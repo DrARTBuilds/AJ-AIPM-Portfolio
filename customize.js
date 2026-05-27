@@ -573,6 +573,18 @@ function dJ(r){
   console.log('   ❌ Failed to locate dJ sakura component index boundaries in Javascript file!');
 }
 
+// 3.9. UPGRADE FLOATING RAFT TO AN INTERACTIVE LINKEDIN REDIRECT TRIGGER
+console.log('\n⚙️ Upgrading floating wooden raft to interactive LinkedIn redirect trigger...');
+const originalRaft = 'function mJ(r){const{nodes:e,materials:t}=br("/models/dea75aa855004fc48a3cddbb33bce248.glb");return q.jsx("group",{...r,dispose:null,children:q.jsx("group",{scale:.01,children:q.jsx("mesh",{castShadow:!0,receiveShadow:!0,geometry:e.Raft_Raft_0.geometry,material:t.Raft,rotation:[-Math.PI/2,0,0],scale:100})})})}br.preload("/models/dea75aa855004fc48a3cddbb33bce248.glb");';
+const targetRaft = 'function mJ(r){const{nodes:e,materials:t}=br("/models/dea75aa855004fc48a3cddbb33bce248.glb");const handleClick=(evt)=>{evt.stopPropagation();if(typeof window!=="undefined"){window.open("https://www.linkedin.com/in/dr-ajay-reddy-tummeti/","_blank")}};const handleOver=(evt)=>{evt.stopPropagation();if(typeof document!=="undefined"){document.body.style.cursor="pointer"}};const handleOut=(evt)=>{evt.stopPropagation();if(typeof document!=="undefined"){document.body.style.cursor="auto"}};return q.jsx("group",{...r,dispose:null,onClick:handleClick,onPointerOver:handleOver,onPointerOut:handleOut,children:q.jsx("group",{scale:.01,children:q.jsx("mesh",{castShadow:!0,receiveShadow:!0,geometry:e.Raft_Raft_0.geometry,material:t.Raft,rotation:[-Math.PI/2,0,0],scale:100})})})}br.preload("/models/dea75aa855004fc48a3cddbb33bce248.glb");';
+
+if (modifiedJs.includes(originalRaft)) {
+  modifiedJs = modifiedJs.replace(originalRaft, targetRaft);
+  console.log('✅ Successfully upgraded floating wooden raft with LinkedIn tap-to-redirect and cursor highlighting!');
+} else {
+  console.log('❌ Failed to locate floating wooden raft component in Javascript file!');
+}
+
 // 4. INJECT WEATHER SYSTEM INTO R3F CANVAS
 console.log('\n⚙️ Injecting dynamic Weather and Bioluminescence Engine...');
 
