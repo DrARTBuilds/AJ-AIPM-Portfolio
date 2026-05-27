@@ -1,0 +1,21 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Backups and temporary files
+*.bak
+*.tmp
+*.log
+.system_generated/
+
+# Scratch folders and system data
+scratch/
+.gemini/
+.antigravity/
+brain/
+.DS_Store
+Thumbs.db
+
+# Large raw model source zips (optional, keeping compiled .glb/.gltf assets)
+models/*.zip
+textures/*.zip

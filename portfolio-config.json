@@ -1,0 +1,75 @@
+{
+  "name": "Ajay Tummeti",
+  "email": "contact@drart.pm",
+  "linkedin": "https://www.linkedin.com/in/dr-art-pm",
+  "github": "https://github.com/drart-pm",
+  "about_header": "About me",
+  "about_text": "I'm Ajay Tummeti,\nProduct Manager & 0→1 Builder.\n\nBuilt on curiosity.\nDriven by systems thinking.\nRefined through data.\nGrounded in user empathy.\nExecuted with clarity.",
+  "about_video_url": "/music/about_me.mp4",
+  "projects": [
+    {
+      "id": 0,
+      "title": "AI Product Strategy",
+      "description": "Enterprise generative AI strategy and roadmap implementation.",
+      "image": "/images/jdosiq_command_center.webp",
+      "tags": ["AI Strategy", "Product Ops", "LLMs"],
+      "link": "https://github.com/drart-pm"
+    },
+    {
+      "id": 1,
+      "title": "Creative Design Hub",
+      "description": "Collaborative digital design canvas and prototyping suite.",
+      "image": "/images/patient_registry.webp",
+      "tags": ["UX Design", "Figma", "Research"],
+      "link": "https://github.com/drart-pm"
+    },
+    {
+      "id": 2,
+      "title": "Growth Analytics Platform",
+      "description": "Real-time user engagement and product analytics dashboard.",
+      "image": "/images/adanalyzer_dashboard.webp",
+      "tags": ["Product Growth", "Data Viz", "Metrics"],
+      "link": "https://github.com/drart-pm"
+    },
+    {
+      "id": 3,
+      "title": "Mobile Wellness App",
+      "description": "Designed and launched a meditation and health tracker app.",
+      "image": "/images/carenheal.webp",
+      "tags": ["Mobile App", "iOS & Android", "UX"],
+      "link": "https://github.com/drart-pm"
+    },
+    {
+      "id": 4,
+      "title": "B2B SaaS Ecosystem",
+      "description": "Scalable cloud infrastructure and multi-tenant management portal.",
+      "image": "/images/solarscout.webp",
+      "tags": ["SaaS", "API Design", "Cloud Systems"],
+      "link": "https://github.com/drart-pm"
+    },
+    {
+      "id": 5,
+      "title": "Web3 Marketplace",
+      "description": "Decentralized creative asset platform with smart contracts.",
+      "image": "/images/jdosiq_command_center.webp",
+      "tags": ["Web3", "Blockchain", "Art Tech"],
+      "link": "https://github.com/drart-pm"
+    },
+    {
+      "id": 6,
+      "title": "Agile Delivery Suite",
+      "description": "Custom project management automation for high-performing teams.",
+      "image": "/images/adanalyzer_dashboard.webp",
+      "tags": ["Agile", "Scrum", "Tooling"],
+      "link": "https://github.com/drart-pm"
+    },
+    {
+      "id": 7,
+      "title": "Digital Art Lab",
+      "description": "Interactive web canvas displaying generative art and geometry.",
+      "image": "/images/patient_registry.webp",
+      "tags": ["Creative Coding", "Art", "WebGL"],
+      "link": "https://github.com/drart-pm"
+    }
+  ]
+}
