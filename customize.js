@@ -585,6 +585,18 @@ if (modifiedJs.includes(originalRaft)) {
   console.log('❌ Failed to locate floating wooden raft component in Javascript file!');
 }
 
+// 3.95. UPGRADE 3D SHOWCASE CARDS WITH DOUBLE-TAP/CLICK DIRECT REDIRECTS
+console.log('\n⚙️ Upgrading 3D showcase cards with double-tap/click direct redirects...');
+const originalCardClick = 'onClick:()=>n&&n(N.key),style:{cursor:"pointer"}';
+const targetCardClick = 'onClick:()=>n&&n(N.key),onDoubleClick:e=>{e.stopPropagation();const l=NC[N.key]?.link;l&&l!=="#"&&window.open(l,"_blank")},style:{cursor:"pointer"}';
+
+if (modifiedJs.includes(originalCardClick)) {
+  modifiedJs = modifiedJs.replace(originalCardClick, targetCardClick);
+  console.log('✅ Successfully upgraded 3D rotating cards with double-tap/click direct redirects!');
+} else {
+  console.log('❌ Failed to locate 3D rotating cards click handler in Javascript file!');
+}
+
 // 4. INJECT WEATHER SYSTEM INTO R3F CANVAS
 console.log('\n⚙️ Injecting dynamic Weather and Bioluminescence Engine...');
 

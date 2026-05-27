@@ -9,19 +9,19 @@
   "projects": [
     {
       "id": 0,
-      "title": "AI Product Strategy",
+      "title": "jdosiq",
       "description": "Enterprise generative AI strategy and roadmap implementation.",
       "image": "/images/jdosiq_command_center.webp",
       "tags": ["AI Strategy", "Product Ops", "LLMs"],
-      "link": "https://github.com/drart-pm"
+      "link": "https://jdosiq.vercel.app"
     },
     {
       "id": 1,
-      "title": "Creative Design Hub",
+      "title": "ClinicalOS",
       "description": "Collaborative digital design canvas and prototyping suite.",
       "image": "/images/patient_registry.webp",
       "tags": ["UX Design", "Figma", "Research"],
-      "link": "https://github.com/drart-pm"
+      "link": "https://clinical-os-delta.vercel.app"
     },
     {
       "id": 2,
@@ -41,19 +41,19 @@
     },
     {
       "id": 4,
-      "title": "B2B SaaS Ecosystem",
+      "title": "Solarscout",
       "description": "Scalable cloud infrastructure and multi-tenant management portal.",
       "image": "/images/solarscout.webp",
       "tags": ["SaaS", "API Design", "Cloud Systems"],
-      "link": "https://github.com/drart-pm"
+      "link": "https://solar-scout-ochre.vercel.app"
     },
     {
       "id": 5,
-      "title": "Web3 Marketplace",
+      "title": "jdosiq",
       "description": "Decentralized creative asset platform with smart contracts.",
       "image": "/images/jdosiq_command_center.webp",
       "tags": ["Web3", "Blockchain", "Art Tech"],
-      "link": "https://github.com/drart-pm"
+      "link": "https://jdosiq.vercel.app"
     },
     {
       "id": 6,
@@ -65,11 +65,11 @@
     },
     {
       "id": 7,
-      "title": "Digital Art Lab",
+      "title": "ClinicalOS",
       "description": "Interactive web canvas displaying generative art and geometry.",
       "image": "/images/patient_registry.webp",
       "tags": ["Creative Coding", "Art", "WebGL"],
-      "link": "https://github.com/drart-pm"
+      "link": "https://clinical-os-delta.vercel.app"
     }
   ]
 }
