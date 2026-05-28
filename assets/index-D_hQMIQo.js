@@ -5072,9 +5072,12 @@ function dJ(r){
 
 const StarrySky = ({ count = 2500 }) => {
   const pointsRef = xe.useRef();
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const actualCount = isMobile ? Math.floor(count * 1.5) : count;
+
   const [positions, colors] = xe.useMemo(() => {
-    const pos = new Float32Array(count * 3);
-    const cols = new Float32Array(count * 3);
+    const pos = new Float32Array(actualCount * 3);
+    const cols = new Float32Array(actualCount * 3);
     
     // Aesthetic, cosmic color palette (Soft White, Ice Blue, Soft Warm Gold, Pale Purple)
     const starColors = [
@@ -5084,7 +5087,7 @@ const StarrySky = ({ count = 2500 }) => {
       [0.95, 0.88, 1.0]    // Pale Purple
     ];
 
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < actualCount; i++) {
       const u = Math.random();
       const v = Math.random();
       const theta = u * 2.0 * Math.PI;
@@ -5100,7 +5103,7 @@ const StarrySky = ({ count = 2500 }) => {
       cols[i * 3 + 2] = col[2];
     }
     return [pos, cols];
-  }, [count]);
+  }, [actualCount]);
 
   Rl((state) => {
     if (!pointsRef.current) return;
@@ -5112,12 +5115,12 @@ const StarrySky = ({ count = 2500 }) => {
     ref: pointsRef,
     children: q.jsxs("bufferGeometry", {
       children: [
-        q.jsx("bufferAttribute", { attach: "attributes-position", count: count, array: positions, itemSize: 3 }),
-        q.jsx("bufferAttribute", { attach: "attributes-color", count: count, array: colors, itemSize: 3 })
+        q.jsx("bufferAttribute", { attach: "attributes-position", count: actualCount, array: positions, itemSize: 3 }),
+        q.jsx("bufferAttribute", { attach: "attributes-color", count: actualCount, array: colors, itemSize: 3 })
       ]
     }),
     material: q.jsx("pointsMaterial", {
-      size: 0.95,
+      size: isMobile ? 1.45 : 0.95,
       vertexColors: !0,
       transparent: !0,
       opacity: 0.9,
@@ -5420,6 +5423,7 @@ const LightningEffect = ({ active = !1 }) => {
 };
 
 function CustomWeatherScene({ isDarkMode, originalSkyRotation, originalSkyScale, dayEnvMap, nightEnvMap }) {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   const points = [
     [1,-9.6,5], [1,-9.6,-20], [1,-4.6,-60], [25,-9.6,-100], 
     [15,-4.6,-160], [15,-9.6,-220], [20,-4.6,-300], 
@@ -5509,13 +5513,13 @@ function CustomWeatherScene({ isDarkMode, originalSkyRotation, originalSkyScale,
     }
   } else {
     // NIGHT MODE (Highly atmospheric golden bioluminescent aesthetics!)
-    ambientIntensity = 0.04;
-    ambientColor = "#020308"; // Deep midnight-indigo cold tone
-    dirIntensity = 0.08;
+    ambientIntensity = isMobile ? 0.12 : 0.04;
+    ambientColor = isMobile ? "#040614" : "#020308"; // Deep midnight-indigo cold tone, slightly brighter on mobile
+    dirIntensity = isMobile ? 0.16 : 0.08;
     dirColor = "#cbd5e1"; // Cool silver moonlight
     
     if (weather === 'clear') {
-      fogColor = "#000104";
+      fogColor = isMobile ? "#02030a" : "#000104";
       fogFar = 720;
       // BIOLUMINESCENCE ACTIVATED (Glowing Gold!)
       waterMixColor = "#03040c"; // Dark midnight indigo water
@@ -5523,14 +5527,14 @@ function CustomWeatherScene({ isDarkMode, originalSkyRotation, originalSkyScale,
       particleSize = 0.26; // High glow size
       particleCount = 5800; // Extra glow density
     } else if (weather === 'cloudy') {
-      fogColor = "#000102";
+      fogColor = isMobile ? "#020308" : "#000102";
       fogFar = 360;
       waterMixColor = "#010206";
       particleColor = "#f59e0b"; // Warm amber gold
       particleSize = 0.20;
       particleCount = 4500;
     } else if (weather === 'rainy' || weather === 'stormy') {
-      fogColor = "#000002";
+      fogColor = isMobile ? "#020208" : "#000002";
       fogNear = 2;
       fogFar = 190;
       waterMixColor = "#000001";
@@ -5538,7 +5542,7 @@ function CustomWeatherScene({ isDarkMode, originalSkyRotation, originalSkyScale,
       particleSize = 0.22;
       particleCount = 4600;
     } else if (weather === 'snowy') {
-      fogColor = "#000105";
+      fogColor = isMobile ? "#02030a" : "#000105";
       fogNear = 3;
       fogFar = 270;
       waterMixColor = "#020408";
@@ -5566,7 +5570,7 @@ function CustomWeatherScene({ isDarkMode, originalSkyRotation, originalSkyScale,
             scale: originalSkyScale,
             children: [
               q.jsx("sphereGeometry", { args: [1, 64, 64] }),
-              q.jsx("meshBasicMaterial", { side: Vr, toneMapped: !1, map: computedSkyMap, color: isDay ? "#ffffff" : "#0c0f20" })
+              q.jsx("meshBasicMaterial", { side: Vr, toneMapped: !1, map: computedSkyMap, color: isDay ? "#ffffff" : (isMobile ? "#141830" : "#0c0f20") })
             ]
           })
         })
