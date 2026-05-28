@@ -29,7 +29,7 @@
       "description": "Real-time user engagement and product analytics dashboard.",
       "image": "/images/adanalyzer_dashboard.webp",
       "tags": ["Product Growth", "Data Viz", "Metrics"],
-      "link": "https://github.com/drart-pm"
+      "link": "https://adanalyzer.vercel.app"
     },
     {
       "id": 3,
@@ -37,7 +37,7 @@
       "description": "Designed and launched a meditation and health tracker app.",
       "image": "/images/carenheal.webp",
       "tags": ["Mobile App", "iOS & Android", "UX"],
-      "link": "https://github.com/drart-pm"
+      "link": "https://carenheal.vercel.app"
     },
     {
       "id": 4,
@@ -61,7 +61,7 @@
       "description": "Custom project management automation for high-performing teams.",
       "image": "/images/adanalyzer_dashboard.webp",
       "tags": ["Agile", "Scrum", "Tooling"],
-      "link": "https://github.com/drart-pm"
+      "link": "https://adanalyzer.vercel.app"
     },
     {
       "id": 7,
