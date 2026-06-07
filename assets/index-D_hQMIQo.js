@@ -6346,7 +6346,7 @@ if (typeof document !== 'undefined') {
             align-items: center;
           ">
             <span style="color: rgba(255,255,255,0.8); font-size: 15px; font-weight: 500; word-break: break-all;">
-              contact@drart.pm
+              hello@ajaytummeti.com
             </span>
             <div style="display: flex; gap: 10px; width: 100%;">
               <button id="btn-copy-email" style="
@@ -6362,7 +6362,7 @@ if (typeof document !== 'undefined') {
                 transition: all 0.2s;
               ">Copy Email</button>
               
-              <a href="mailto:contact@drart.pm" style="
+              <a href="mailto:hello@ajaytummeti.com" style="
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -6441,7 +6441,7 @@ if (typeof document !== 'undefined') {
     });
 
     copyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText('contact@drart.pm').then(() => {
+      navigator.clipboard.writeText('hello@ajaytummeti.com').then(() => {
         const originalText = copyBtn.innerText;
         copyBtn.innerText = 'Copied!';
         copyBtn.style.background = 'rgba(34, 197, 94, 0.2)';
