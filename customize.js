@@ -174,6 +174,26 @@ if (modifiedJs.includes(originalLinkedIn)) {
   console.log('✅ Customized LinkedIn contact link.');
 }
 
+// Customize Navbar Get In Touch button to open Contact Modal
+const originalNavbarLink = `q.jsx("a",{href:"mailto:${config.email}",className:"text-sm text-white/70 hover:text-white transition-colors duration-300 border border-white/30 px-6 py-2 rounded hover:border-white/60",children:"Get In Touch"})`;
+const targetNavbarLink = 'q.jsx("a",{onClick:(e)=>{e.preventDefault();window.dispatchEvent(new CustomEvent("open-contact-modal"))},style:{cursor:"pointer"},className:"text-sm text-white/70 hover:text-white transition-colors duration-300 border border-white/30 px-6 py-2 rounded hover:border-white/60",children:"Get In Touch"})';
+if (modifiedJs.includes(originalNavbarLink)) {
+  modifiedJs = modifiedJs.replace(originalNavbarLink, targetNavbarLink);
+  console.log('✅ Upgraded navbar Get In Touch button to open Contact Modal.');
+} else {
+  console.log('⚠️ Could not find exact navbar Get In Touch link in Javascript.');
+}
+
+// Customize Signpost Get In Touch button to open Contact Modal
+const originalSignpostLink = `onClick:()=>{window.location.href="mailto:${config.email}?subject=Let's%20Build%20Something%20Impressive"},children:"[Get in touch →]"`;
+const targetSignpostLink = `onClick:()=>{window.dispatchEvent(new CustomEvent("open-contact-modal"))},children:"[Get in touch →]"`;
+if (modifiedJs.includes(originalSignpostLink)) {
+  modifiedJs = modifiedJs.replace(originalSignpostLink, targetSignpostLink);
+  console.log('✅ Upgraded 3D signpost Get In Touch button to open Contact Modal.');
+} else {
+  console.log('⚠️ Could not find exact 3D signpost Get In Touch link in Javascript.');
+}
+
 // 3.5. CUSTOMIZE BIOLUMINESCENCE SPLINE PARTICLES FOR GLOWING GOLDEN CIRCLES
 console.log('\n⚙️ Customizing spline particles to glowing golden circles...');
 
@@ -1773,6 +1793,277 @@ if (typeof document !== 'undefined') {
 
 modifiedJs += videoModalSourceCode;
 console.log('🎉 Portfolio Video Modal overlay appended successfully!');
+
+// Contact Modal injection
+const cleanWhatsapp = config.whatsapp ? config.whatsapp.replace(/[^0-9]/g, '') : '919000977556';
+const contactModalSourceCode = `
+if (typeof document !== 'undefined') {
+  const injectContactModal = () => {
+    if (document.getElementById('voyage-contact-modal')) return;
+
+    const modal = document.createElement('div');
+    modal.id = 'voyage-contact-modal';
+    modal.style.cssText = \`
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 10000;
+      background: rgba(8, 12, 24, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    \`;
+
+    modal.innerHTML = \`
+      <div id="contact-modal-content" style="
+        position: relative;
+        width: 90%;
+        max-width: 440px;
+        background: rgba(15, 23, 42, 0.92);
+        border: 2px solid rgba(251, 191, 36, 0.45);
+        border-radius: 20px;
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7), 0 0 40px rgba(251, 191, 36, 0.18);
+        padding: 40px 32px 36px 32px;
+        text-align: center;
+        transform: scale(0.9);
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        font-family: system-ui, -apple-system, sans-serif;
+      ">
+        <button id="btn-close-contact" style="
+          position: absolute;
+          top: 18px;
+          right: 18px;
+          z-index: 10;
+          background: rgba(30, 41, 59, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 50%;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: #ffffff;
+          font-size: 14px;
+          font-weight: bold;
+          cursor: pointer;
+          transition: all 0.25s;
+        ">✕</button>
+
+        <h3 style="
+          margin: 0 0 8px 0;
+          color: #ffffff;
+          font-size: 24px;
+          font-weight: 300;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+        ">Get In Touch</h3>
+        <p style="
+          margin: 0 0 32px 0;
+          color: rgba(255, 255, 255, 0.6);
+          font-size: 14px;
+          font-weight: 300;
+        ">Let's build something impressive together.</p>
+
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- WhatsApp Button -->
+          <a href="https://wa.me/${cleanWhatsapp}?text=Hi%20Ajay,%20I%20saw%20your%20portfolio%20and%20would%20love%20to%20get%20in%20touch!" 
+             target="_blank" 
+             id="contact-whatsapp-btn"
+             style="
+               display: flex;
+               align-items: center;
+               justify-content: center;
+               gap: 12px;
+               background: #25D366;
+               color: #ffffff;
+               text-decoration: none;
+               padding: 14px;
+               border-radius: 10px;
+               font-weight: 600;
+               font-size: 16px;
+               box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+               transition: all 0.3s;
+             ">
+            <svg style="width: 24px; height: 24px; fill: currentColor;" viewBox="0 0 24 24">
+              <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.73-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.625 1.451 5.402.002 9.792-4.385 9.795-9.79.002-2.618-1.01-5.08-2.857-6.932C16.32 2.03 13.86 1.017 11.24 1.017c-5.405 0-9.794 4.387-9.797 9.79-.001 1.768.484 3.497 1.406 5.02L1.823 21.9l6.3-1.654-.476-.092z"/>
+            </svg>
+            Chat on WhatsApp
+          </a>
+
+          <!-- LinkedIn Button -->
+          <a href="${config.linkedin}" 
+             target="_blank" 
+             id="contact-linkedin-btn"
+             style="
+               display: flex;
+               align-items: center;
+               justify-content: center;
+               gap: 12px;
+               background: #0077B5;
+               color: #ffffff;
+               text-decoration: none;
+               padding: 14px;
+               border-radius: 10px;
+               font-weight: 600;
+               font-size: 16px;
+               box-shadow: 0 4px 12px rgba(0, 119, 181, 0.3);
+               transition: all 0.3s;
+             ">
+            <svg style="width: 20px; height: 20px; fill: currentColor;" viewBox="0 0 24 24">
+              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+            </svg>
+            Connect on LinkedIn
+          </a>
+
+          <!-- Email Section -->
+          <div style="
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+          ">
+            <span style="color: rgba(255,255,255,0.8); font-size: 15px; font-weight: 500; word-break: break-all;">
+              ${config.email}
+            </span>
+            <div style="display: flex; gap: 10px; width: 100%;">
+              <button id="btn-copy-email" style="
+                flex: 1;
+                background: rgba(251, 191, 36, 0.15);
+                border: 1px solid rgba(251, 191, 36, 0.4);
+                color: #fef08a;
+                padding: 10px;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+              ">Copy Email</button>
+              
+              <a href="mailto:${config.email}" style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                color: #ffffff;
+                text-decoration: none;
+                width: 40px;
+                border-radius: 6px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: all 0.2s;
+              " title="Open Mail Client">
+                ✉
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    \`;
+
+    document.body.appendChild(modal);
+
+    const closeBtn = document.getElementById('btn-close-contact');
+    const copyBtn = document.getElementById('btn-copy-email');
+    const waBtn = document.getElementById('contact-whatsapp-btn');
+    const liBtn = document.getElementById('contact-linkedin-btn');
+
+    const closeModal = () => {
+      modal.style.opacity = '0';
+      modal.style.pointerEvents = 'none';
+      document.getElementById('contact-modal-content').style.transform = 'scale(0.9)';
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    closeBtn.addEventListener('mouseenter', () => {
+      closeBtn.style.background = 'rgba(251, 191, 36, 0.95)';
+      closeBtn.style.color = '#0f172a';
+    });
+    closeBtn.addEventListener('mouseleave', () => {
+      closeBtn.style.background = 'rgba(30, 41, 59, 0.7)';
+      closeBtn.style.color = '#ffffff';
+    });
+
+    waBtn.addEventListener('mouseenter', () => {
+      waBtn.style.background = '#20ba5a';
+      waBtn.style.transform = 'translateY(-2px)';
+      waBtn.style.boxShadow = '0 6px 16px rgba(37, 211, 102, 0.45)';
+    });
+    waBtn.addEventListener('mouseleave', () => {
+      waBtn.style.background = '#25D366';
+      waBtn.style.transform = 'translateY(0)';
+      waBtn.style.boxShadow = '0 4px 12px rgba(37, 211, 102, 0.3)';
+    });
+
+    liBtn.addEventListener('mouseenter', () => {
+      liBtn.style.background = '#00669c';
+      liBtn.style.transform = 'translateY(-2px)';
+      liBtn.style.boxShadow = '0 6px 16px rgba(0, 119, 181, 0.45)';
+    });
+    liBtn.addEventListener('mouseleave', () => {
+      liBtn.style.background = '#0077B5';
+      liBtn.style.transform = 'translateY(0)';
+      liBtn.style.boxShadow = '0 4px 12px rgba(0, 119, 181, 0.3)';
+    });
+
+    copyBtn.addEventListener('mouseenter', () => {
+      copyBtn.style.background = 'rgba(251, 191, 36, 0.25)';
+    });
+    copyBtn.addEventListener('mouseleave', () => {
+      copyBtn.style.background = 'rgba(251, 191, 36, 0.15)';
+    });
+
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText('${config.email}').then(() => {
+        const originalText = copyBtn.innerText;
+        copyBtn.innerText = 'Copied!';
+        copyBtn.style.background = 'rgba(34, 197, 94, 0.2)';
+        copyBtn.style.borderColor = 'rgba(34, 197, 94, 0.5)';
+        copyBtn.style.color = '#86efac';
+        setTimeout(() => {
+          copyBtn.innerText = originalText;
+          copyBtn.style.background = 'rgba(251, 191, 36, 0.15)';
+          copyBtn.style.borderColor = 'rgba(251, 191, 36, 0.4)';
+          copyBtn.style.color = '#fef08a';
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+      });
+    });
+
+    window.addEventListener('open-contact-modal', () => {
+      modal.style.opacity = '1';
+      modal.style.pointerEvents = 'auto';
+      document.getElementById('contact-modal-content').style.transform = 'scale(1)';
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectContactModal);
+  } else {
+    injectContactModal();
+  }
+}
+`;
+
+modifiedJs += contactModalSourceCode;
+console.log('🎉 Portfolio Contact Modal overlay appended successfully!');
 
 // Write the modified JS
 try {
