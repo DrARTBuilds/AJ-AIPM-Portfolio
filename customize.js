@@ -1441,6 +1441,14 @@ if (typeof document !== 'undefined') {
       '.celestial-widget.night-theme .moon-shape {' +
         'opacity: 1;' +
         'transform: rotate(0deg) scale(1);' +
+      '}' +
+      '@media (max-width: 768px) {' +
+        '.celestial-widget {' +
+          'right: 12px;' +
+          'top: 75px;' +
+          'transform-origin: top right;' +
+          'transform: scale(0.7);' +
+        '}' +
       '}';
     
     document.head.appendChild(styleSheet);
