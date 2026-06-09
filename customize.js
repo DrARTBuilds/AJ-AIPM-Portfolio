@@ -617,6 +617,29 @@ if (modifiedJs.includes(originalCardClick)) {
   console.log('❌ Failed to locate 3D rotating cards click handler in Javascript file!');
 }
 
+// 3.96. UPGRADE SCROLL PROMPT FOR MOBILE (SWIPE UP TO EXPLORE & FIX PULL-TO-REFRESH)
+console.log('\n⚙️ Upgrading scroll prompt for mobile "Swipe Up" guidance...');
+const originalScrollPrompt = 'children:[q.jsx("p",{className:"text-white text-sm md:text-base font-light tracking-widest uppercase",children:"Scroll to Explore"}),q.jsx(ff.div,{className:"flex justify-center mt-2",animate:{y:[0,6,0]},transition:{duration:2,repeat:1/0},children:q.jsx("svg",{className:"w-5 h-5 text-white",fill:"none",strokeLinecap:"round",strokeLinejoin:"round",strokeWidth:"2",viewBox:"0 0 24 24",stroke:"currentColor",children:q.jsx("path",{d:"M19 14l-7 7m0 0l-7-7m7 7V3"})})})]';
+
+const targetScrollPrompt = 'children:[' +
+  'q.jsxs("div", {className:"hidden md:block text-center",children:[' +
+    'q.jsx("p",{className:"text-white text-base font-light tracking-widest uppercase",children:"Scroll to Explore"}),' +
+    'q.jsx(ff.div,{className:"flex justify-center mt-2",animate:{y:[0,6,0]},transition:{duration:2,repeat:1/0},children:q.jsx("svg",{className:"w-5 h-5 text-white",fill:"none",strokeLinecap:"round",strokeLinejoin:"round",strokeWidth:"2",viewBox:"0 0 24 24",stroke:"currentColor",children:q.jsx("path",{d:"M19 14l-7 7m0 0l-7-7m7 7V3"})})})' +
+  ']}),' +
+  'q.jsxs("div", {className:"block md:hidden text-center",children:[' +
+    'q.jsx(ff.div,{className:"flex justify-center mb-3",animate:{y:[8,0,8]},transition:{duration:1.5,repeat:1/0},children:q.jsx("svg",{className:"w-8 h-8 text-white",fill:"none",strokeLinecap:"round",strokeLinejoin:"round",strokeWidth:"2",viewBox:"0 0 24 24",stroke:"currentColor",children:q.jsx("path",{d:"M5 10l7-7m0 0l7 7m-7-7v18"})})}),' +
+    'q.jsx("p",{className:"text-white text-sm font-light tracking-widest uppercase mt-1",children:"Swipe Up to Explore"})' +
+  ']})' +
+']';
+
+if (modifiedJs.includes(originalScrollPrompt)) {
+  modifiedJs = modifiedJs.replace(originalScrollPrompt, targetScrollPrompt);
+  console.log('✅ Successfully upgraded Scroll Prompt with mobile-specific Swipe Up animation!');
+} else {
+  console.log('❌ Failed to locate Scroll Prompt in Javascript file!');
+}
+
+
 // 4. INJECT WEATHER SYSTEM INTO R3F CANVAS
 console.log('\n⚙️ Injecting dynamic Weather and Bioluminescence Engine...');
 
@@ -2109,6 +2132,20 @@ if (modifiedHtml.includes(originalTitle)) {
   modifiedHtml = modifiedHtml.replace(originalTitle, targetTitle);
   console.log('✅ Customized HTML page title.');
 }
+
+// Add overscroll-behavior to prevent pull-to-refresh on mobile
+const overscrollStyle = `
+    <style>
+      body, html {
+        overscroll-behavior-y: none;
+      }
+    </style>
+  </head>`;
+if (modifiedHtml.includes('</head>') && !modifiedHtml.includes('overscroll-behavior-y: none')) {
+  modifiedHtml = modifiedHtml.replace('</head>', overscrollStyle);
+  console.log('✅ Injected overscroll-behavior-y: none to prevent mobile pull-to-refresh.');
+}
+
 
 // Disable/Remove Awwwards floating badge
 const awwwardsDiv = '<div id="awwwards"';
