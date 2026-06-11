@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="/src/style.css" rel="stylesheet">
     <title>Ajay Tummeti | PM Portfolio</title>
-    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1781150789119"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1781150789119">
+    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1781150946798"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1781150946798">
   
     <link rel="preload" as="video" type="video/mp4" href="/music/about_me.mp4">
   
@@ -55,6 +55,26 @@
     </style>
     <script>
       window.addEventListener('DOMContentLoaded', () => {
+        // A/B Testing Assignment
+        let experimentVariant = localStorage.getItem('Start_Button_Experiment');
+        if (!experimentVariant) {
+          experimentVariant = Math.random() < 0.5 ? 'Variant_A_Manual' : 'Variant_B_AutoClick';
+          localStorage.setItem('Start_Button_Experiment', experimentVariant);
+        }
+
+        // Wait for Microsoft Clarity to be available, then set the Custom Tag
+        const clarityInterval = setInterval(() => {
+          if (typeof window.clarity === 'function') {
+            window.clarity("set", "Start_Button_Experiment", experimentVariant);
+            clearInterval(clarityInterval);
+          }
+        }, 500);
+        
+        // If Variant A, do nothing (user must click manually)
+        if (experimentVariant === 'Variant_A_Manual') {
+          return; 
+        }
+
         let clicked = false;
         const clickInterval = setInterval(() => {
           const btn = document.getElementById('auto-start-btn');

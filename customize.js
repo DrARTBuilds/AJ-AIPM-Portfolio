@@ -2198,6 +2198,26 @@ const overscrollStyle = `
     </style>
     <script>
       window.addEventListener('DOMContentLoaded', () => {
+        // A/B Testing Assignment
+        let experimentVariant = localStorage.getItem('Start_Button_Experiment');
+        if (!experimentVariant) {
+          experimentVariant = Math.random() < 0.5 ? 'Variant_A_Manual' : 'Variant_B_AutoClick';
+          localStorage.setItem('Start_Button_Experiment', experimentVariant);
+        }
+
+        // Wait for Microsoft Clarity to be available, then set the Custom Tag
+        const clarityInterval = setInterval(() => {
+          if (typeof window.clarity === 'function') {
+            window.clarity("set", "Start_Button_Experiment", experimentVariant);
+            clearInterval(clarityInterval);
+          }
+        }, 500);
+        
+        // If Variant A, do nothing (user must click manually)
+        if (experimentVariant === 'Variant_A_Manual') {
+          return; 
+        }
+
         let clicked = false;
         const clickInterval = setInterval(() => {
           const btn = document.getElementById('auto-start-btn');
