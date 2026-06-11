@@ -622,11 +622,11 @@ console.log('\n⚙️ Upgrading scroll prompt for mobile "Swipe Up" guidance...'
 const originalScrollPrompt = 'children:[q.jsx("p",{className:"text-white text-sm md:text-base font-light tracking-widest uppercase",children:"Scroll to Explore"}),q.jsx(ff.div,{className:"flex justify-center mt-2",animate:{y:[0,6,0]},transition:{duration:2,repeat:1/0},children:q.jsx("svg",{className:"w-5 h-5 text-white",fill:"none",strokeLinecap:"round",strokeLinejoin:"round",strokeWidth:"2",viewBox:"0 0 24 24",stroke:"currentColor",children:q.jsx("path",{d:"M19 14l-7 7m0 0l-7-7m7 7V3"})})})]';
 
 const targetScrollPrompt = 'children:[' +
-  'q.jsxs("div", {className:"hidden md:block text-center",children:[' +
+  'q.jsxs("div", {className:"desktop-only text-center",children:[' +
     'q.jsx("p",{className:"text-white text-base font-light tracking-widest uppercase",children:"Scroll to Explore"}),' +
     'q.jsx(ff.div,{className:"flex justify-center mt-2",animate:{y:[0,6,0]},transition:{duration:2,repeat:1/0},children:q.jsx("svg",{className:"w-5 h-5 text-white",fill:"none",strokeLinecap:"round",strokeLinejoin:"round",strokeWidth:"2",viewBox:"0 0 24 24",stroke:"currentColor",children:q.jsx("path",{d:"M19 14l-7 7m0 0l-7-7m7 7V3"})})})' +
   ']}),' +
-  'q.jsxs("div", {className:"block md:hidden text-center",children:[' +
+  'q.jsxs("div", {className:"mobile-only text-center",children:[' +
     'q.jsx(ff.div,{className:"flex justify-center mb-3",animate:{y:[8,0,8]},transition:{duration:1.5,repeat:1/0},children:q.jsx("svg",{className:"w-8 h-8 text-white",fill:"none",strokeLinecap:"round",strokeLinejoin:"round",strokeWidth:"2",viewBox:"0 0 24 24",stroke:"currentColor",children:q.jsx("path",{d:"M5 10l7-7m0 0l7 7m-7-7v18"})})}),' +
     'q.jsx("p",{className:"text-white text-sm font-light tracking-widest uppercase mt-1",children:"Swipe Up to Explore"})' +
   ']})' +
@@ -2185,6 +2185,15 @@ const overscrollStyle = `
         z-index: 50;
         opacity: 0;
         filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+      }
+      
+      @media (min-width: 768px) {
+        .mobile-only { display: none !important; }
+        .desktop-only { display: block !important; }
+      }
+      @media (max-width: 767px) {
+        .mobile-only { display: block !important; }
+        .desktop-only { display: none !important; }
       }
     </style>
     <script>
