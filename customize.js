@@ -639,6 +639,26 @@ if (modifiedJs.includes(originalScrollPrompt)) {
   console.log('❌ Failed to locate Scroll Prompt in Javascript file!');
 }
 
+// 3.97. UPGRADE LENIS SCROLL FOR SMOOTHER START (FIX DELAY/SWIPE ISSUES)
+console.log('\n⚙️ Adjusting Lenis virtual scroll settings to fix starting delay...');
+const originalLenis = 'smoothTouch:!1,touchMultiplier:2';
+const targetLenis = 'smoothTouch:!0,touchMultiplier:3.5,wheelMultiplier:1.5';
+if (modifiedJs.includes(originalLenis)) {
+  modifiedJs = modifiedJs.replace(originalLenis, targetLenis);
+  modifiedJs = modifiedJs.replace('duration:1.8,', 'duration:1.2,');
+  console.log('✅ Successfully boosted touchMultiplier and duration for smoother scroll start!');
+} else {
+  console.log('❌ Failed to locate Lenis scroll config in Javascript file!');
+}
+
+// 3.98. ADD ID TO START BUTTON FOR AUTO-CLICK
+const originalStartBtn = 'onClick:()=>{s(!0);const o=t.current;o&&o.startDissolve&&o.startDissolve()},className:"shine-button';
+const targetStartBtn = 'id:"auto-start-btn",onClick:()=>{s(!0);const o=t.current;o&&o.startDissolve&&o.startDissolve()},className:"shine-button';
+if (modifiedJs.includes(originalStartBtn)) {
+  modifiedJs = modifiedJs.replace(originalStartBtn, targetStartBtn);
+}
+
+
 
 // 4. INJECT WEATHER SYSTEM INTO R3F CANVAS
 console.log('\n⚙️ Injecting dynamic Weather and Bioluminescence Engine...');
@@ -2147,12 +2167,63 @@ const overscrollStyle = `
       body, html {
         overscroll-behavior-y: none;
       }
+      
+      @keyframes autoClickHandAnim {
+        0% { transform: translate(30px, 30px) scale(1.2); opacity: 0; }
+        20% { transform: translate(10px, 10px) scale(1); opacity: 1; }
+        70% { transform: translate(0px, 0px) scale(1); opacity: 1; }
+        85% { transform: translate(-5px, -5px) scale(0.85); opacity: 1; }
+        100% { transform: translate(-5px, -5px) scale(0.85); opacity: 0; }
+      }
+      .auto-click-hand {
+        position: absolute;
+        bottom: -20px;
+        right: -10px;
+        width: 48px;
+        height: 48px;
+        pointer-events: none;
+        z-index: 50;
+        opacity: 0;
+        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+      }
     </style>
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        let clicked = false;
+        const clickInterval = setInterval(() => {
+          const btn = document.getElementById('auto-start-btn');
+          if (btn && !clicked) {
+            clicked = true;
+            clearInterval(clickInterval);
+            
+            // Create animated hand element
+            const hand = document.createElement('div');
+            hand.className = 'auto-click-hand';
+            hand.innerHTML = '<svg viewBox="0 0 24 24" fill="white" stroke="rgba(0,0,0,0.8)" stroke-width="1"><path d="M9 11.24V7.5C9 6.12 10.12 5 11.5 5S14 6.12 14 7.5v3.76l2.08-1.04c.83-.41 1.83-.16 2.37.59l.71 1.01c.42.59.34 1.4-.18 1.9L14 18.5V20c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2v-4.5c0-.4.12-.79.34-1.12l2.77-4.15c.34-.51.91-.83 1.52-.87.12-.01.25-.01.37-.12z"></path></svg>';
+            btn.appendChild(hand);
+            
+            // Start animation after a short delay
+            setTimeout(() => {
+              hand.style.animation = 'autoClickHandAnim 1.2s forwards cubic-bezier(0.2, 0.8, 0.2, 1)';
+              
+              // Actually trigger the click when the animation "presses"
+              setTimeout(() => {
+                btn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                  btn.click();
+                }, 100);
+              }, 1000);
+            }, 800);
+          }
+        }, 300);
+      });
+    </script>
   </head>`;
 if (modifiedHtml.includes('</head>') && !modifiedHtml.includes('overscroll-behavior-y: none')) {
   modifiedHtml = modifiedHtml.replace('</head>', overscrollStyle);
-  console.log('✅ Injected overscroll-behavior-y: none to prevent mobile pull-to-refresh.');
+  console.log('✅ Injected overscroll-behavior-y: none and Auto-Clicker hand script.');
 }
+
 
 
 // Disable/Remove Awwwards floating badge
