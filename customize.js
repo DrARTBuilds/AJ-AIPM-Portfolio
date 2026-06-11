@@ -658,6 +658,16 @@ if (modifiedJs.includes(originalStartBtn)) {
   modifiedJs = modifiedJs.replace(originalStartBtn, targetStartBtn);
 }
 
+// 3.99. PATCH REACT LOADER-COMPLETE TO FORCIBLY RESIZE AND WAKE UP THE CANVAS
+const originalLoaderComplete = 'const g=()=>{s(!1),n(!0)},v=()=>{n(!1),e(!0),d()};';
+const targetLoaderComplete = 'const g=()=>{s(!1),n(!0),setTimeout(()=>{window.dispatchEvent(new Event("resize"));const cv=document.querySelector("canvas");if(cv){const rc=cv.getBoundingClientRect();cv.dispatchEvent(new PointerEvent("pointermove",{clientX:rc.left+rc.width/2,clientY:rc.top+rc.height/2,bubbles:!0}))}},50)},v=()=>{n(!1),e(!0),d()};';
+if (modifiedJs.includes(originalLoaderComplete)) {
+  modifiedJs = modifiedJs.replace(originalLoaderComplete, targetLoaderComplete);
+  console.log('✅ Patched React loader-complete callback (g) to trigger canvas wake-up.');
+} else {
+  console.log('❌ Failed to locate React loader-complete callback (g) in Javascript file!');
+}
+
 
 
 // 4. INJECT WEATHER SYSTEM INTO R3F CANVAS
@@ -2185,6 +2195,37 @@ const overscrollStyle = `
           window.addEventListener(evt, resumeAudio, { passive: true });
         });
       }
+
+      // R3F Canvas Wake-up & Resize Helper
+      (function() {
+        const triggerWakeup = () => {
+          window.dispatchEvent(new Event('resize'));
+          const canvas = document.querySelector('canvas');
+          if (canvas) {
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+              const x = rect.left + rect.width / 2;
+              const y = rect.top + rect.height / 2;
+              const opts = { clientX: x, clientY: y, bubbles: true };
+              canvas.dispatchEvent(new PointerEvent('pointermove', opts));
+              canvas.dispatchEvent(new MouseEvent('mousemove', opts));
+            }
+          }
+        };
+
+        // Schedule wakeup at key timestamps (during loader, right after loader fades, and later)
+        [100, 500, 1000, 2000, 3000, 4800, 5100, 5500, 6000, 7000, 8000, 10000].forEach(delay => {
+          setTimeout(triggerWakeup, delay);
+        });
+
+        // Also trigger on first user interaction events to immediately initialize
+        const events = ['click', 'touchstart', 'mousemove', 'scroll', 'pointermove'];
+        const handler = () => {
+          triggerWakeup();
+          events.forEach(evt => window.removeEventListener(evt, handler));
+        };
+        events.forEach(evt => window.addEventListener(evt, handler, { passive: true }));
+      })();
     </script>
     <style>
       body, html {

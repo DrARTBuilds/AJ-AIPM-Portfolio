@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="/src/style.css" rel="stylesheet">
     <title>Ajay Tummeti | PM Portfolio</title>
-    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1781153842753"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1781153842753">
+    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1781154674438"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1781154674438">
   
     <link rel="preload" as="video" type="video/mp4" href="/music/about_me.mp4">
   
@@ -42,6 +42,37 @@
           window.addEventListener(evt, resumeAudio, { passive: true });
         });
       }
+
+      // R3F Canvas Wake-up & Resize Helper
+      (function() {
+        const triggerWakeup = () => {
+          window.dispatchEvent(new Event('resize'));
+          const canvas = document.querySelector('canvas');
+          if (canvas) {
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+              const x = rect.left + rect.width / 2;
+              const y = rect.top + rect.height / 2;
+              const opts = { clientX: x, clientY: y, bubbles: true };
+              canvas.dispatchEvent(new PointerEvent('pointermove', opts));
+              canvas.dispatchEvent(new MouseEvent('mousemove', opts));
+            }
+          }
+        };
+
+        // Schedule wakeup at key timestamps (during loader, right after loader fades, and later)
+        [100, 500, 1000, 2000, 3000, 4800, 5100, 5500, 6000, 7000, 8000, 10000].forEach(delay => {
+          setTimeout(triggerWakeup, delay);
+        });
+
+        // Also trigger on first user interaction events to immediately initialize
+        const events = ['click', 'touchstart', 'mousemove', 'scroll', 'pointermove'];
+        const handler = () => {
+          triggerWakeup();
+          events.forEach(evt => window.removeEventListener(evt, handler));
+        };
+        events.forEach(evt => window.addEventListener(evt, handler, { passive: true }));
+      })();
     </script>
     <style>
       body, html {
