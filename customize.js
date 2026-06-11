@@ -2177,10 +2177,10 @@ const overscrollStyle = `
       }
       .auto-click-hand {
         position: absolute;
-        bottom: -20px;
-        right: -10px;
-        width: 48px;
-        height: 48px;
+        bottom: -30px;
+        right: -20px;
+        width: 80px;
+        height: 80px;
         pointer-events: none;
         z-index: 50;
         opacity: 0;
@@ -2208,7 +2208,7 @@ const overscrollStyle = `
             // Create animated hand element
             const hand = document.createElement('div');
             hand.className = 'auto-click-hand';
-            hand.innerHTML = '<svg viewBox="0 0 24 24" fill="white" stroke="rgba(0,0,0,0.8)" stroke-width="1"><path d="M9 11.24V7.5C9 6.12 10.12 5 11.5 5S14 6.12 14 7.5v3.76l2.08-1.04c.83-.41 1.83-.16 2.37.59l.71 1.01c.42.59.34 1.4-.18 1.9L14 18.5V20c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2v-4.5c0-.4.12-.79.34-1.12l2.77-4.15c.34-.51.91-.83 1.52-.87.12-.01.25-.01.37-.12z"></path></svg>';
+            hand.innerHTML = '<img src="/images/hand_pointer.png" alt="Pointer" style="width: 100%; height: 100%; object-fit: contain; transform: rotate(-15deg); filter: drop-shadow(0 6px 12px rgba(0,0,0,0.4));" />';
             btn.appendChild(hand);
             
             // Start animation after a short delay
