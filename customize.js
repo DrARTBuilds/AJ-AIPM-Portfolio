@@ -2163,6 +2163,29 @@ if (modifiedHtml.includes(originalTitle)) {
 
 // Add overscroll-behavior to prevent pull-to-refresh on mobile
 const overscrollStyle = `
+    <script>
+      // AudioContext Auto-Resume Patch
+      window.__audioContexts = [];
+      const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
+      if (OriginalAudioContext) {
+        window.AudioContext = function(...args) {
+          const ctx = new OriginalAudioContext(...args);
+          window.__audioContexts.push(ctx);
+          return ctx;
+        };
+        window.AudioContext.prototype = OriginalAudioContext.prototype;
+        if (window.webkitAudioContext) window.webkitAudioContext = window.AudioContext;
+        
+        const resumeAudio = () => {
+          window.__audioContexts.forEach(ctx => {
+            if (ctx.state === 'suspended') ctx.resume();
+          });
+        };
+        ['click', 'touchstart', 'scroll', 'wheel', 'keydown'].forEach(evt => {
+          window.addEventListener(evt, resumeAudio, { passive: true });
+        });
+      }
+    </script>
     <style>
       body, html {
         overscroll-behavior-y: none;
