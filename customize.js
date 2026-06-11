@@ -2226,6 +2226,32 @@ const overscrollStyle = `
         };
         events.forEach(evt => window.addEventListener(evt, handler, { passive: true }));
       })();
+
+      // Audio Autoplay Recovery Helper (resumes blocked HTML5 audio on first user gesture)
+      (function() {
+        const events = ['click', 'touchstart', 'scroll', 'wheel', 'keydown', 'pointerdown'];
+        const startAudioOnInteraction = () => {
+          const bgAudio = document.querySelector('audio[src*="background.mp3"]') || document.querySelector('audio');
+          const bgMusicBtn = document.querySelector('button[title="Pause"]');
+          if (bgAudio && bgMusicBtn) {
+            if (bgAudio.paused) {
+              console.log('🎵 User interaction detected. Forcing background music play()...');
+              bgAudio.play()
+                .then(() => {
+                  events.forEach(evt => window.removeEventListener(evt, startAudioOnInteraction));
+                })
+                .catch(err => {
+                  console.warn('⚠️ Forced audio play failed:', err);
+                });
+            } else {
+              events.forEach(evt => window.removeEventListener(evt, startAudioOnInteraction));
+            }
+          }
+        };
+        events.forEach(evt => {
+          window.addEventListener(evt, startAudioOnInteraction, { passive: true });
+        });
+      })();
     </script>
     <style>
       body, html {
