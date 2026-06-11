@@ -1995,40 +1995,32 @@ if (typeof document !== 'undefined') {
             gap: 12px;
             align-items: center;
           ">
-            <span style="color: rgba(255,255,255,0.8); font-size: 15px; font-weight: 500; word-break: break-all;">
+            <span style="color: rgba(255,255,255,0.65); font-size: 14px; font-weight: 400; word-break: break-all;">
               ${config.email}
             </span>
-            <div style="display: flex; gap: 10px; width: 100%;">
-              <button id="btn-copy-email" style="
-                flex: 1;
-                background: rgba(251, 191, 36, 0.15);
-                border: 1px solid rgba(251, 191, 36, 0.4);
-                color: #fef08a;
-                padding: 10px;
-                border-radius: 6px;
-                font-size: 14px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.2s;
-              ">Copy Email</button>
-              
-              <a href="mailto:${config.email}" style="
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: rgba(255, 255, 255, 0.08);
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                color: #ffffff;
-                text-decoration: none;
-                width: 40px;
-                border-radius: 6px;
-                font-size: 16px;
-                cursor: pointer;
-                transition: all 0.2s;
-              " title="Open Mail Client">
-                ✉
-              </a>
-            </div>
+            <a href="mailto:${config.email}?subject=Let's%20Connect" id="contact-email-btn" style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+              width: 100%;
+              box-sizing: border-box;
+              background: rgba(251, 191, 36, 0.15);
+              border: 1px solid rgba(251, 191, 36, 0.4);
+              color: #fef08a;
+              padding: 10px;
+              border-radius: 6px;
+              font-size: 14px;
+              font-weight: 600;
+              text-decoration: none;
+              cursor: pointer;
+              transition: all 0.2s;
+            " onmouseover="this.style.background='rgba(251, 191, 36, 0.35)'; this.style.borderColor='rgba(251, 191, 36, 0.8)';" onmouseout="this.style.background='rgba(251, 191, 36, 0.15)'; this.style.borderColor='rgba(251, 191, 36, 0.4)';">
+              <svg style="width: 16px; height: 16px; fill: currentColor;" viewBox="0 0 24 24">
+                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+              </svg>
+              Send Email
+            </a>
           </div>
         </div>
       </div>
@@ -2037,7 +2029,6 @@ if (typeof document !== 'undefined') {
     document.body.appendChild(modal);
 
     const closeBtn = document.getElementById('btn-close-contact');
-    const copyBtn = document.getElementById('btn-copy-email');
     const waBtn = document.getElementById('contact-whatsapp-btn');
     const liBtn = document.getElementById('contact-linkedin-btn');
 
@@ -2081,31 +2072,6 @@ if (typeof document !== 'undefined') {
       liBtn.style.background = '#0077B5';
       liBtn.style.transform = 'translateY(0)';
       liBtn.style.boxShadow = '0 4px 12px rgba(0, 119, 181, 0.3)';
-    });
-
-    copyBtn.addEventListener('mouseenter', () => {
-      copyBtn.style.background = 'rgba(251, 191, 36, 0.25)';
-    });
-    copyBtn.addEventListener('mouseleave', () => {
-      copyBtn.style.background = 'rgba(251, 191, 36, 0.15)';
-    });
-
-    copyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText('${config.email}').then(() => {
-        const originalText = copyBtn.innerText;
-        copyBtn.innerText = 'Copied!';
-        copyBtn.style.background = 'rgba(34, 197, 94, 0.2)';
-        copyBtn.style.borderColor = 'rgba(34, 197, 94, 0.5)';
-        copyBtn.style.color = '#86efac';
-        setTimeout(() => {
-          copyBtn.innerText = originalText;
-          copyBtn.style.background = 'rgba(251, 191, 36, 0.15)';
-          copyBtn.style.borderColor = 'rgba(251, 191, 36, 0.4)';
-          copyBtn.style.color = '#fef08a';
-        }, 2000);
-      }).catch(err => {
-        console.error('Failed to copy text: ', err);
-      });
     });
 
     window.addEventListener('open-contact-modal', () => {
