@@ -2129,6 +2129,21 @@ if (config.clarity_project_id) {
   console.log('✅ Injected Microsoft Clarity tracking code.');
 }
 
+// Inject Google Analytics GA4 tracking code
+if (config.google_analytics_id && config.google_analytics_id !== 'G-XXXXXXXXXX') {
+  const gaScript = `
+    <!-- Google tag (gtag.js) GA4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=${config.google_analytics_id}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '${config.google_analytics_id}');
+    </script>`;
+  modifiedHtml = modifiedHtml.replace('</head>', `${gaScript}\n  </head>`);
+  console.log('✅ Injected Google Analytics GA4 tracking code.');
+}
+
 // Replace title
 const originalTitle = '<title>Voyage</title>';
 const targetTitle = `<title>${config.name} | PM Portfolio</title>`;
