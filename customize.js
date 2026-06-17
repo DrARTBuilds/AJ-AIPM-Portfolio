@@ -194,6 +194,26 @@ if (modifiedJs.includes(originalSignpostLink)) {
   console.log('⚠️ Could not find exact 3D signpost Get In Touch link in Javascript.');
 }
 
+// Expose Lenis globally as window.lenis
+const originalLenisInstance = 'const r=new Qte({';
+const targetLenisInstance = 'const r=window.lenis=new Qte({';
+if (modifiedJs.includes(originalLenisInstance)) {
+  modifiedJs = modifiedJs.replace(originalLenisInstance, targetLenisInstance);
+  console.log('✅ Exposed Lenis globally as window.lenis.');
+} else {
+  console.log('⚠️ Could not find Lenis instantiation to expose.');
+}
+
+// Delay scroll prompt <nne /> visibility until after video modal is closed
+const originalNne = 'function nne(){const r=xe.useRef(null),{scrollY:e}=_z(),t=xz(1);return mz(e,"change",n=>{const i=Math.max(0,4-n/800);t.set(i)}),q.jsx(ff.div,{ref:r,';
+const targetNne = 'function nne(){const r=xe.useRef(null),{scrollY:e}=_z(),t=xz(0);return xe.useEffect(()=>{const h=()=>{window.scrollPromptRevealed=!0;t.set(1)};window.addEventListener("show-scroll-prompt",h);return ()=>window.removeEventListener("show-scroll-prompt",h)},[]),mz(e,"change",n=>{if(window.scrollPromptRevealed){const i=Math.max(0,4-n/800);t.set(i)}}),q.jsx(ff.div,{ref:r,';
+if (modifiedJs.includes(originalNne)) {
+  modifiedJs = modifiedJs.replace(originalNne, targetNne);
+  console.log('✅ Delayed scroll prompt <nne /> visibility and added show-scroll-prompt listener.');
+} else {
+  console.log('⚠️ Could not find scroll prompt <nne /> to delay visibility.');
+}
+
 // 3.5. CUSTOMIZE BIOLUMINESCENCE SPLINE PARTICLES FOR GLOWING GOLDEN CIRCLES
 console.log('\n⚙️ Customizing spline particles to glowing golden circles...');
 
@@ -660,10 +680,10 @@ if (modifiedJs.includes(originalStartBtn)) {
 
 // 3.99. PATCH REACT LOADER-COMPLETE TO FORCIBLY RESIZE AND WAKE UP THE CANVAS
 const originalLoaderComplete = 'const g=()=>{s(!1),n(!0)},v=()=>{n(!1),e(!0),d()};';
-const targetLoaderComplete = 'const g=()=>{s(!1),n(!0),setTimeout(()=>{window.dispatchEvent(new Event("resize"));const cv=document.querySelector("canvas");if(cv){const rc=cv.getBoundingClientRect();cv.dispatchEvent(new PointerEvent("pointermove",{clientX:rc.left+rc.width/2,clientY:rc.top+rc.height/2,bubbles:!0}))}},50)},v=()=>{n(!1),e(!0),d()};';
+const targetLoaderComplete = 'const g=()=>{s(!1),n(!0),setTimeout(()=>{window.dispatchEvent(new Event("resize"));const cv=document.querySelector("canvas");if(cv){const rc=cv.getBoundingClientRect();cv.dispatchEvent(new PointerEvent("pointermove",{clientX:rc.left+rc.width/2,clientY:rc.top+rc.height/2,bubbles:!0}))}},50)},v=()=>{n(!1),e(!0),d(),window.dispatchEvent(new Event("experience-started"))};';
 if (modifiedJs.includes(originalLoaderComplete)) {
   modifiedJs = modifiedJs.replace(originalLoaderComplete, targetLoaderComplete);
-  console.log('✅ Patched React loader-complete callback (g) to trigger canvas wake-up.');
+  console.log('✅ Patched React loader-complete callback (g) to trigger canvas wake-up and experience-started event.');
 } else {
   console.log('❌ Failed to locate React loader-complete callback (g) in Javascript file!');
 }
@@ -1757,6 +1777,10 @@ if (typeof document !== 'undefined') {
         document.getElementById('video-player-container').innerHTML = '';
       }, 400);
 
+      // Reveal the scroll prompt
+      window.scrollPromptRevealed = true;
+      window.dispatchEvent(new Event('show-scroll-prompt'));
+
       // Auto-resume background music if it was playing before
       if (wasBgMusicPlaying) {
         const bgMusicBtn = document.querySelector('button[title="Play"]');
@@ -2152,6 +2176,41 @@ if (modifiedHtml.includes(originalTitle)) {
   console.log('✅ Customized HTML page title.');
 }
 
+// Inject premium native HTML loader screen inside <div id="root">
+const nativeLoader = `<div id="root">
+  <div id="native-html-loader" style="
+    position: fixed;
+    inset: 0;
+    background: #090a0f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #ffffff;
+  ">
+    <div style="
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top-color: #fbbf24;
+      animation: native-spin 1s linear infinite;
+      margin-bottom: 20px;
+    "></div>
+    <div style="font-size: 18px; font-weight: 300; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255, 255, 255, 0.85); margin-bottom: 8px;">Ajay Tummeti</div>
+    <div style="font-size: 12px; font-weight: 400; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); text-transform: uppercase;">Loading 3D Experience...</div>
+    <style>
+      @keyframes native-spin { to { transform: rotate(360deg); } }
+    </style>
+  </div>
+</div>`;
+if (modifiedHtml.includes('<div id="root"></div>')) {
+  modifiedHtml = modifiedHtml.replace('<div id="root"></div>', nativeLoader);
+  console.log('✅ Injected premium native HTML loader screen inside #root.');
+}
+
 // Add overscroll-behavior to prevent pull-to-refresh on mobile
 const overscrollStyle = `
     <script>
@@ -2231,6 +2290,25 @@ const overscrollStyle = `
         };
         events.forEach(evt => {
           window.addEventListener(evt, startAudioOnInteraction, { passive: true });
+        });
+      })();
+
+      // Cinematic Auto-Scroll & Video Autoplay Coordinator
+      (function() {
+        window.addEventListener('experience-started', () => {
+          setTimeout(() => {
+            if (window.lenis) {
+              console.log('🎬 Experience started. Triggering auto-scroll to monolith...');
+              window.lenis.scrollTo(4000, {
+                duration: 5.0,
+                easing: (t) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t),
+                onComplete: () => {
+                  console.log('🎬 Scroll complete. Autoplay about video...');
+                  window.dispatchEvent(new Event('open-about-video'));
+                }
+              });
+            }
+          }, 800);
         });
       })();
     </script>

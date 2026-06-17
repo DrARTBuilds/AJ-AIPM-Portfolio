@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="/src/style.css" rel="stylesheet">
     <title>Ajay Tummeti | PM Portfolio</title>
-    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1781558565931"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1781558565931">
+    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1781687539296"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1781687539296">
   
     <link rel="preload" as="video" type="video/mp4" href="/music/about_me.mp4">
   
@@ -108,6 +108,25 @@
           window.addEventListener(evt, startAudioOnInteraction, { passive: true });
         });
       })();
+
+      // Cinematic Auto-Scroll & Video Autoplay Coordinator
+      (function() {
+        window.addEventListener('experience-started', () => {
+          setTimeout(() => {
+            if (window.lenis) {
+              console.log('🎬 Experience started. Triggering auto-scroll to monolith...');
+              window.lenis.scrollTo(4000, {
+                duration: 5.0,
+                easing: (t) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t),
+                onComplete: () => {
+                  console.log('🎬 Scroll complete. Autoplay about video...');
+                  window.dispatchEvent(new Event('open-about-video'));
+                }
+              });
+            }
+          }, 800);
+        });
+      })();
     </script>
     <style>
       body, html {
@@ -196,6 +215,34 @@
   </head>
   <body>
    <!-- Removed Awwwards floating badge -->
-    <div id="root"></div>
+    <div id="root">
+  <div id="native-html-loader" style="
+    position: fixed;
+    inset: 0;
+    background: #090a0f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #ffffff;
+  ">
+    <div style="
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top-color: #fbbf24;
+      animation: native-spin 1s linear infinite;
+      margin-bottom: 20px;
+    "></div>
+    <div style="font-size: 18px; font-weight: 300; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255, 255, 255, 0.85); margin-bottom: 8px;">Ajay Tummeti</div>
+    <div style="font-size: 12px; font-weight: 400; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); text-transform: uppercase;">Loading 3D Experience...</div>
+    <style>
+      @keyframes native-spin { to { transform: rotate(360deg); } }
+    </style>
+  </div>
+</div>
   </body>
 </html>
