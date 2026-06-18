@@ -2299,9 +2299,9 @@ const overscrollStyle = `
           setTimeout(() => {
             if (window.lenis) {
               console.log('🎬 Experience started. Triggering auto-scroll to monolith...');
-              window.lenis.scrollTo(4000, {
-                duration: 5.0,
-                easing: (t) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t),
+              window.lenis.scrollTo(3300, {
+                duration: 8.5,
+                easing: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
                 onComplete: () => {
                   console.log('🎬 Scroll complete. Autoplay about video...');
                   window.dispatchEvent(new Event('open-about-video'));
@@ -2377,7 +2377,7 @@ const overscrollStyle = `
             // Create animated hand element
             const hand = document.createElement('div');
             hand.className = 'auto-click-hand';
-            hand.innerHTML = '<img src="/images/hand_pointer.png" alt="Pointer" style="width: 100%; height: 100%; object-fit: contain; transform: rotate(-15deg); filter: drop-shadow(0 6px 12px rgba(0,0,0,0.4));" />';
+            hand.innerHTML = '<img src="/images/hand_pointer.webp" alt="Pointer" style="width: 100%; height: 100%; object-fit: contain; transform: rotate(-15deg); filter: drop-shadow(0 6px 12px rgba(0,0,0,0.4));" />';
             btn.appendChild(hand);
             
             // Start animation after a short delay
