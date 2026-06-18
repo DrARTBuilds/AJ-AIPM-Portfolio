@@ -69,10 +69,10 @@ if (modifiedJs.includes(originalEmail)) {
 
 // Replace Landing Image
 const originalLandingImage = 'image:"/images/main2.webp"';
-const targetLandingImage = 'image:"/images/Main1.webp"';
+const targetLandingImage = 'image:"/images/Main1.png"';
 if (modifiedJs.includes(originalLandingImage)) {
   modifiedJs = modifiedJs.split(originalLandingImage).join(targetLandingImage);
-  console.log('✅ Customized landing screen image to Main1.webp.');
+  console.log('✅ Customized landing screen image to Main1.png.');
 } else {
   console.log('⚠️ Could not find landing screen image reference in Javascript.');
 }
@@ -680,10 +680,10 @@ if (modifiedJs.includes(originalStartBtn)) {
 
 // 3.99. PATCH REACT LOADER-COMPLETE TO FORCIBLY RESIZE AND WAKE UP THE CANVAS
 const originalLoaderComplete = 'const g=()=>{s(!1),n(!0)},v=()=>{n(!1),e(!0),d()};';
-const targetLoaderComplete = 'const g=()=>{s(!1),n(!0),setTimeout(()=>{try{window.dispatchEvent(new Event("resize"));const cv=document.querySelector("canvas");if(cv){const rc=cv.getBoundingClientRect();const x=rc.left+rc.width/2;const y=rc.top+rc.height/2;try{cv.dispatchEvent(new PointerEvent("pointermove",{clientX:x,clientY:y,bubbles:!0}))}catch(err){cv.dispatchEvent(new MouseEvent("mousemove",{clientX:x,clientY:y,bubbles:!0}))}}}catch(e){console.warn("Loader complete wakeup exception handled:",e)},50)},v=()=>{n(!1),e(!0),d(),window.dispatchEvent(new Event("experience-started"))};';
+const targetLoaderComplete = 'const g=()=>{s(!1),n(!0),setTimeout(()=>{window.dispatchEvent(new Event("resize"));const cv=document.querySelector("canvas");if(cv){const rc=cv.getBoundingClientRect();cv.dispatchEvent(new PointerEvent("pointermove",{clientX:rc.left+rc.width/2,clientY:rc.top+rc.height/2,bubbles:!0}))}},50)},v=()=>{n(!1),e(!0),d(),window.dispatchEvent(new Event("experience-started"))};';
 if (modifiedJs.includes(originalLoaderComplete)) {
   modifiedJs = modifiedJs.replace(originalLoaderComplete, targetLoaderComplete);
-  console.log('✅ Patched React loader-complete callback (g) to trigger canvas wake-up and experience-started event (with safe exception handling).');
+  console.log('✅ Patched React loader-complete callback (g) to trigger canvas wake-up and experience-started event.');
 } else {
   console.log('❌ Failed to locate React loader-complete callback (g) in Javascript file!');
 }
@@ -2239,25 +2239,17 @@ const overscrollStyle = `
       // R3F Canvas Wake-up & Resize Helper
       (function() {
         const triggerWakeup = () => {
-          try {
-            window.dispatchEvent(new Event('resize'));
-            const canvas = document.querySelector('canvas');
-            if (canvas) {
-              const rect = canvas.getBoundingClientRect();
-              if (rect.width > 0 && rect.height > 0) {
-                const x = rect.left + rect.width / 2;
-                const y = rect.top + rect.height / 2;
-                const opts = { clientX: x, clientY: y, bubbles: true };
-                try {
-                  canvas.dispatchEvent(new PointerEvent('pointermove', opts));
-                } catch (peErr) {
-                  canvas.dispatchEvent(new MouseEvent('mousemove', opts));
-                }
-                canvas.dispatchEvent(new MouseEvent('mousemove', opts));
-              }
+          window.dispatchEvent(new Event('resize'));
+          const canvas = document.querySelector('canvas');
+          if (canvas) {
+            const rect = canvas.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+              const x = rect.left + rect.width / 2;
+              const y = rect.top + rect.height / 2;
+              const opts = { clientX: x, clientY: y, bubbles: true };
+              canvas.dispatchEvent(new PointerEvent('pointermove', opts));
+              canvas.dispatchEvent(new MouseEvent('mousemove', opts));
             }
-          } catch (e) {
-            console.warn('Canvas wakeup error:', e);
           }
         };
 
@@ -2265,27 +2257,6 @@ const overscrollStyle = `
         [100, 500, 1000, 2000, 3000, 4800, 5100, 5500, 6000, 7000, 8000, 10000].forEach(delay => {
           setTimeout(triggerWakeup, delay);
         });
-
-        // Active layout reflow loop for 9 seconds to force R3F ResizeObserver to fire
-        let wakeupCount = 0;
-        const wakeupInterval = setInterval(() => {
-          triggerWakeup();
-          try {
-            const canvas = document.querySelector('canvas');
-            if (canvas) {
-              const height = canvas.offsetHeight; // force layout reflow
-              const origWidth = canvas.style.width;
-              canvas.style.width = '99.9%';
-              requestAnimationFrame(() => {
-                canvas.style.width = origWidth || '100%';
-              });
-            }
-          } catch (e) {}
-          wakeupCount++;
-          if (wakeupCount > 30) { // 30 * 300ms = 9 seconds
-            clearInterval(wakeupInterval);
-          }
-        }, 300);
 
         // Also trigger on first user interaction events to immediately initialize
         const events = ['click', 'touchstart', 'mousemove', 'scroll', 'pointermove'];
@@ -2344,7 +2315,6 @@ const overscrollStyle = `
     <style>
       body, html {
         overscroll-behavior-y: none;
-        background-color: #090a0f !important;
       }
       
       @keyframes autoClickHandAnim {
@@ -2407,7 +2377,7 @@ const overscrollStyle = `
             // Create animated hand element
             const hand = document.createElement('div');
             hand.className = 'auto-click-hand';
-            hand.innerHTML = '<img src="/images/hand_pointer.webp" alt="Pointer" style="width: 100%; height: 100%; object-fit: contain; transform: rotate(-15deg); filter: drop-shadow(0 6px 12px rgba(0,0,0,0.4));" />';
+            hand.innerHTML = '<img src="/images/hand_pointer.png" alt="Pointer" style="width: 100%; height: 100%; object-fit: contain; transform: rotate(-15deg); filter: drop-shadow(0 6px 12px rgba(0,0,0,0.4));" />';
             btn.appendChild(hand);
             
             // Start animation after a short delay
