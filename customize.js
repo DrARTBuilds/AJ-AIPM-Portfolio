@@ -159,7 +159,7 @@ if (startIdx !== -1 && endIdx !== -1 && startIdx < endIdx) {
     '}); ' +
   '}; ' +
   'br.preload("/models/japanese_stone_lantern.glb"); ' +
-  'const lJ=({cameraProgress:r,triggerAt:e=.45,triggerRange:t=.02})=>{const n=xe.useRef(),i=xe.useRef(!1),videoAutoPlayed=xe.useRef(!1),s=-45,a=-10.5,o=()=>{i.current||!n.current||(i.current=!0,No.to(n.current.position,{y:a,duration:1.2,ease:"power2.out"}))};Rl(()=>{if(!n.current)return;const u=r?.current??0,c=Math.max(0,t/2),d=Math.max(0,e-c*9),g=Math.min(1,e+c);!i.current&&u>=d&&u<=g&&o();if(!videoAutoPlayed.current&&u>=e+0.09&&u<=e+0.13){videoAutoPlayed.current=!0;if(typeof window!=="undefined"){window.dispatchEvent(new CustomEvent("open-about-video"));}}});const [hoveredHeader, setHoveredHeader] = xe.useState(!1);const [hoveredBody, setHoveredBody] = xe.useState(!1);const handleOpenVideo = (e) => { e.stopPropagation(); videoAutoPlayed.current=!0; if (typeof window !== "undefined") { window.dispatchEvent(new CustomEvent("open-about-video")); } };const handlePointerOver = (setter) => (e) => { e.stopPropagation(); setter(!0); if (typeof document !== "undefined") { document.body.style.cursor = "pointer"; } };const handlePointerOut = (setter) => () => { setter(!1); if (typeof document !== "undefined") { document.body.style.cursor = "auto"; } };return q.jsxs("group",{ref:n,position:[-5,s,-100],rotation:[0,6,0],children:[q.jsx(Wq,{}),q.jsx(JapaneseStoneLantern,{}),q.jsxs("group",{rotation:[0,Math.PI/6,0],children:[q.jsx(pl,{position:[0,25,2],fontSize:3.2,font:ml,color:hoveredHeader ? "#fbbf24" : "#ffffff",anchorX:\"center\",anchorY:\"bottom\",\"material-toneMapped\":!1,onPointerOver: handlePointerOver(setHoveredHeader),onPointerOut: handlePointerOut(setHoveredHeader),onClick: handleOpenVideo,children:\"' + config.about_header + ' 🎥\"}),q.jsx(pl,{position:[0,23,1],font:ml,fontSize:hoveredBody ? 2.05 : 2.0,maxWidth:20,lineHeight:1,anchorX:\"center\",anchorY:\"top\",color:hoveredBody ? \"#fef08a\" : \"#ffffff\",\"material-toneMapped\":!1,onPointerOver: handlePointerOver(setHoveredBody),onPointerOut: handlePointerOut(setHoveredBody),onClick: handleOpenVideo,children:`' + config.about_text.replace(/`/g, '\\`').replace(/\$/g, '\\$') + '`})]})]})};';
+  'const lJ=({cameraProgress:r,triggerAt:e=.45,triggerRange:t=.02})=>{const n=xe.useRef(),i=xe.useRef(!1),videoAutoPlayed=xe.useRef(!1),s=-45,a=-10.5,o=()=>{i.current||!n.current||(i.current=!0,No.to(n.current.position,{y:a,duration:1.2,ease:"power2.out"}))};Rl(()=>{if(!n.current)return;const u=r?.current??0,c=Math.max(0,t/2),d=Math.max(0,e-c*9),g=Math.min(1,e+c);!i.current&&u>=d&&u<=g&&o();});const [hoveredHeader, setHoveredHeader] = xe.useState(!1);const [hoveredBody, setHoveredBody] = xe.useState(!1);const handleOpenVideo = (e) => { e.stopPropagation(); videoAutoPlayed.current=!0; if (typeof window !== "undefined") { window.aboutVideoOpened = true; window.dispatchEvent(new CustomEvent("open-about-video")); } };const handlePointerOver = (setter) => (e) => { e.stopPropagation(); setter(!0); if (typeof document !== "undefined") { document.body.style.cursor = "pointer"; } };const handlePointerOut = (setter) => () => { setter(!1); if (typeof document !== "undefined") { document.body.style.cursor = "auto"; } };return q.jsxs("group",{ref:n,position:[-5,s,-100],rotation:[0,6,0],children:[q.jsx(Wq,{}),q.jsx(JapaneseStoneLantern,{}),q.jsxs("group",{rotation:[0,Math.PI/6,0],children:[q.jsx(pl,{position:[0,25,2],fontSize:3.2,font:ml,color:hoveredHeader ? "#fbbf24" : "#ffffff",anchorX:\"center\",anchorY:\"bottom\",\"material-toneMapped\":!1,onPointerOver: handlePointerOver(setHoveredHeader),onPointerOut: handlePointerOut(setHoveredHeader),onClick: handleOpenVideo,children:\"' + config.about_header + ' 🎥\"}),q.jsx(pl,{position:[0,23,1],font:ml,fontSize:hoveredBody ? 2.05 : 2.0,maxWidth:20,lineHeight:1,anchorX:\"center\",anchorY:\"top\",color:hoveredBody ? \"#fef08a\" : \"#ffffff\",\"material-toneMapped\":!1,onPointerOver: handlePointerOver(setHoveredBody),onPointerOut: handlePointerOut(setHoveredBody),onClick: handleOpenVideo,children:`' + config.about_text.replace(/`/g, '\\`').replace(/\$/g, '\\$') + '`})]})]})};';
   modifiedJs = modifiedJs.replace(originalAboutComponent, targetAboutComponent);
   console.log('✅ Replaced entire monolith rock component with upgraded interactive video trigger!');
 } else {
@@ -1817,6 +1817,11 @@ if (typeof document !== 'undefined') {
     });
 
     window.addEventListener('open-about-video', () => {
+      if (window.aboutVideoTimer) {
+        clearTimeout(window.aboutVideoTimer);
+        window.aboutVideoTimer = null;
+      }
+      window.aboutVideoOpened = true;
       // Auto-pause background music if it is currently playing
       wasBgMusicPlaying = false;
       const bgMusicBtn = document.querySelector('button[title="Pause"]');
@@ -2300,11 +2305,21 @@ const overscrollStyle = `
             if (window.lenis) {
               console.log('🎬 Experience started. Triggering auto-scroll to monolith...');
               window.lenis.scrollTo(3300, {
-                duration: 8.5,
+                duration: 5.5,
                 easing: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
                 onComplete: () => {
-                  console.log('🎬 Scroll complete. Autoplay about video...');
-                  window.dispatchEvent(new Event('open-about-video'));
+                  console.log('🎬 Scroll complete. Waiting 4.5s for user to read Ruin stone...');
+                  window.aboutVideoTimer = setTimeout(() => {
+                    const currentScroll = window.lenis ? window.lenis.scroll : window.scrollY;
+                    const isNearMonolith = Math.abs(currentScroll - 3300) < 200;
+                    if (!window.aboutVideoOpened && isNearMonolith) {
+                      console.log('🎬 4.5s delay finished. Autoplay about video...');
+                      window.aboutVideoOpened = true;
+                      window.dispatchEvent(new CustomEvent('open-about-video'));
+                    } else {
+                      console.log('🎬 Autoplay skipped: already opened or scrolled away.');
+                    }
+                  }, 4500);
                 }
               });
             }

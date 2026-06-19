@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="/src/style.css" rel="stylesheet">
     <title>Ajay Tummeti | PM Portfolio</title>
-    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1781753970467"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1781753970467">
+    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1781897557717"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1781897557717">
   
     <link rel="preload" as="video" type="video/mp4" href="/music/about_me.mp4">
   
@@ -116,11 +116,21 @@
             if (window.lenis) {
               console.log('🎬 Experience started. Triggering auto-scroll to monolith...');
               window.lenis.scrollTo(3300, {
-                duration: 8.5,
+                duration: 5.5,
                 easing: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
                 onComplete: () => {
-                  console.log('🎬 Scroll complete. Autoplay about video...');
-                  window.dispatchEvent(new Event('open-about-video'));
+                  console.log('🎬 Scroll complete. Waiting 4.5s for user to read Ruin stone...');
+                  window.aboutVideoTimer = setTimeout(() => {
+                    const currentScroll = window.lenis ? window.lenis.scroll : window.scrollY;
+                    const isNearMonolith = Math.abs(currentScroll - 3300) < 200;
+                    if (!window.aboutVideoOpened && isNearMonolith) {
+                      console.log('🎬 4.5s delay finished. Autoplay about video...');
+                      window.aboutVideoOpened = true;
+                      window.dispatchEvent(new CustomEvent('open-about-video'));
+                    } else {
+                      console.log('🎬 Autoplay skipped: already opened or scrolled away.');
+                    }
+                  }, 4500);
                 }
               });
             }
