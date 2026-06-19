@@ -2121,6 +2121,56 @@ if (typeof document !== 'undefined') {
 modifiedJs += contactModalSourceCode;
 console.log('🎉 Portfolio Contact Modal overlay appended successfully!');
 
+// Customize React Loader UI aesthetics to premium dark gold
+console.log('\n⚙️ Customizing React Loader UI aesthetics to premium dark gold...');
+const originalLoaderHtml = 'className:"loader-container fixed inset-0 z-50 flex items-center justify-center bg-[#E3D4B8] transition-opacity duration-800"';
+const targetLoaderHtml = 'className:"loader-container fixed inset-0 z-50 flex items-center justify-center bg-[#090a0f] transition-opacity duration-800"';
+if (modifiedJs.includes(originalLoaderHtml)) {
+  modifiedJs = modifiedJs.replace(originalLoaderHtml, targetLoaderHtml);
+  console.log('   ✅ Upgraded React loader background to matching premium dark color (#090a0f).');
+} else {
+  const originalLoaderHtmlEscaped = 'className:\\"loader-container fixed inset-0 z-50 flex items-center justify-center bg-[#E3D4B8] transition-opacity duration-800\\"';
+  const targetLoaderHtmlEscaped = 'className:\\"loader-container fixed inset-0 z-50 flex items-center justify-center bg-[#090a0f] transition-opacity duration-800\\"';
+  if (modifiedJs.includes(originalLoaderHtmlEscaped)) {
+    modifiedJs = modifiedJs.replace(originalLoaderHtmlEscaped, targetLoaderHtmlEscaped);
+    console.log('   ✅ Upgraded React loader background to matching premium dark color (#090a0f) (escaped).');
+  } else {
+    console.log('   ⚠️ Could not find React loader background class in JS.');
+  }
+}
+
+const originalLoaderStroke = 'stroke:"#374151"';
+const targetLoaderStroke = 'stroke:"#fbbf24"';
+if (modifiedJs.includes(originalLoaderStroke)) {
+  modifiedJs = modifiedJs.replace(originalLoaderStroke, targetLoaderStroke);
+  console.log('   ✅ Upgraded React loader SVG stroke color to gold (#fbbf24).');
+} else {
+  const originalLoaderStrokeEscaped = 'stroke:\\"#374151\\"';
+  const targetLoaderStrokeEscaped = 'stroke:\\"#fbbf24\\"';
+  if (modifiedJs.includes(originalLoaderStrokeEscaped)) {
+    modifiedJs = modifiedJs.replace(originalLoaderStrokeEscaped, targetLoaderStrokeEscaped);
+    console.log('   ✅ Upgraded React loader SVG stroke color to gold (#fbbf24) (escaped).');
+  } else {
+    console.log('   ⚠️ Could not find React loader SVG stroke color in JS.');
+  }
+}
+
+const originalLoaderGlow = 'className:\\"absolute inset-0 bg-gradient-to-r from-gray-600/20 via-gray-700/20 to-gray-600/20 rounded-full blur-3xl\\",style:{animation:\\"pulse 3s ease-in-out infinite\\"}'
+const targetLoaderGlow = 'className:\\"absolute inset-0 rounded-full blur-3xl\\",style:{animation:\\"pulse 3s ease-in-out infinite\\",background:\\"linear-gradient(to right, rgba(251,191,36,0.05), rgba(245,158,11,0.1), rgba(251,191,36,0.05))\\"}'
+if (modifiedJs.includes(originalLoaderGlow)) {
+  modifiedJs = modifiedJs.replace(originalLoaderGlow, targetLoaderGlow);
+  console.log('   ✅ Upgraded React loader background glow to golden.');
+} else {
+  const originalLoaderGlowUnescaped = 'className:"absolute inset-0 bg-gradient-to-r from-gray-600/20 via-gray-700/20 to-gray-600/20 rounded-full blur-3xl",style:{animation:"pulse 3s ease-in-out infinite"}';
+  const targetLoaderGlowUnescaped = 'className:"absolute inset-0 rounded-full blur-3xl",style:{animation:"pulse 3s ease-in-out infinite",background:"linear-gradient(to right, rgba(251,191,36,0.05), rgba(245,158,11,0.1), rgba(251,191,36,0.05))"}';
+  if (modifiedJs.includes(originalLoaderGlowUnescaped)) {
+    modifiedJs = modifiedJs.replace(originalLoaderGlowUnescaped, targetLoaderGlowUnescaped);
+    console.log('   ✅ Upgraded React loader background glow to golden (unescaped).');
+  } else {
+    console.log('   ⚠️ Could not find React loader background glow in JS.');
+  }
+}
+
 // Write the modified JS
 try {
   fs.writeFileSync(JS_PATH, modifiedJs, 'utf8');
@@ -2134,6 +2184,9 @@ try {
 console.log('\n⚙️ Customizing HTML file...');
 const htmlCode = fs.readFileSync(HTML_BAK_PATH, 'utf8');
 let modifiedHtml = htmlCode;
+
+// Force the HTML page to render a dark background color as early as possible (before stylesheets load)
+modifiedHtml = modifiedHtml.replace('<head>', '<head>\n    <style>html, body { background-color: #090a0f !important; margin: 0; padding: 0; width: 100%; height: 100%; }</style>');
 
 // Inject high-performance video preload tag to start downloading the video assets immediately
 const videoUrl = config.about_video_url || '/music/about_me.mp4';
