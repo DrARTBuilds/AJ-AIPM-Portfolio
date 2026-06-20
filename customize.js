@@ -2361,18 +2361,42 @@ const overscrollStyle = `
                 duration: 5.5,
                 easing: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
                 onComplete: () => {
-                  console.log('🎬 Scroll complete. Waiting 4.5s for user to read Ruin stone...');
+                  console.log('🎬 Scroll complete. Waiting 8s for user to read Ruin stone...');
+                  
+                  const cancelAutoplay = () => {
+                    if (window.aboutVideoTimer) {
+                      console.log('🎬 User scrolled/interacted. Cancelling autoplay...');
+                      clearTimeout(window.aboutVideoTimer);
+                      window.aboutVideoTimer = null;
+                      window.aboutVideoOpened = true;
+                    }
+                    cleanupListeners();
+                  };
+                  
+                  const cleanupListeners = () => {
+                    window.removeEventListener('wheel', cancelAutoplay);
+                    window.removeEventListener('touchmove', cancelAutoplay);
+                    window.removeEventListener('keydown', cancelAutoplay);
+                    window.removeEventListener('mousedown', cancelAutoplay);
+                  };
+                  
+                  window.addEventListener('wheel', cancelAutoplay, { passive: true });
+                  window.addEventListener('touchmove', cancelAutoplay, { passive: true });
+                  window.addEventListener('keydown', cancelAutoplay, { passive: true });
+                  window.addEventListener('mousedown', cancelAutoplay, { passive: true });
+                  
                   window.aboutVideoTimer = setTimeout(() => {
+                    cleanupListeners();
                     const currentScroll = window.lenis ? window.lenis.scroll : window.scrollY;
                     const isNearMonolith = Math.abs(currentScroll - 3300) < 200;
                     if (!window.aboutVideoOpened && isNearMonolith) {
-                      console.log('🎬 4.5s delay finished. Autoplay about video...');
+                      console.log('🎬 8s delay finished. Autoplay about video...');
                       window.aboutVideoOpened = true;
                       window.dispatchEvent(new CustomEvent('open-about-video'));
                     } else {
                       console.log('🎬 Autoplay skipped: already opened or scrolled away.');
                     }
-                  }, 4500);
+                  }, 8000);
                 }
               });
             }
