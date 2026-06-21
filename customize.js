@@ -2361,13 +2361,18 @@ const overscrollStyle = `
                 duration: 5.5,
                 easing: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
                 onComplete: () => {
-                  console.log('🎬 Scroll complete. Waiting 8s for user to read Ruin stone...');
+                  console.log('🎬 Scroll complete. Waiting 12s for user to read Ruin stone...');
                   
+                  let autoplayCancelled = false;
+
                   const cancelAutoplay = () => {
-                    if (window.aboutVideoTimer) {
+                    if (!autoplayCancelled) {
                       console.log('🎬 User scrolled/interacted. Cancelling autoplay...');
-                      clearTimeout(window.aboutVideoTimer);
-                      window.aboutVideoTimer = null;
+                      autoplayCancelled = true;
+                      if (window.aboutVideoTimer) {
+                        clearTimeout(window.aboutVideoTimer);
+                        window.aboutVideoTimer = null;
+                      }
                       window.aboutVideoOpened = true;
                     }
                     cleanupListeners();
@@ -2386,17 +2391,37 @@ const overscrollStyle = `
                   window.addEventListener('mousedown', cancelAutoplay, { passive: true });
                   
                   window.aboutVideoTimer = setTimeout(() => {
-                    cleanupListeners();
+                    if (autoplayCancelled || window.aboutVideoOpened) {
+                      cleanupListeners();
+                      return;
+                    }
+                    
                     const currentScroll = window.lenis ? window.lenis.scroll : window.scrollY;
                     const isNearMonolith = Math.abs(currentScroll - 3300) < 200;
-                    if (!window.aboutVideoOpened && isNearMonolith) {
-                      console.log('🎬 8s delay finished. Autoplay about video...');
-                      window.aboutVideoOpened = true;
-                      window.dispatchEvent(new CustomEvent('open-about-video'));
+                    if (isNearMonolith) {
+                      console.log('🎬 12s delay finished. Starting further auto-scroll past Ruin stone...');
+                      
+                      window.lenis.scrollTo(3800, {
+                        duration: 3.0,
+                        easing: (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
+                        onComplete: () => {
+                          cleanupListeners();
+                          const finalScroll = window.lenis ? window.lenis.scroll : window.scrollY;
+                          const isNearTarget = Math.abs(finalScroll - 3800) < 150;
+                          if (!autoplayCancelled && !window.aboutVideoOpened && isNearTarget) {
+                            console.log('🎬 Further scroll complete. Autoplay about video...');
+                            window.aboutVideoOpened = true;
+                            window.dispatchEvent(new CustomEvent('open-about-video'));
+                          } else {
+                            console.log('🎬 Further scroll complete, but autoplay was skipped or cancelled.');
+                          }
+                        }
+                      });
                     } else {
-                      console.log('🎬 Autoplay skipped: already opened or scrolled away.');
+                      console.log('🎬 Autoplay skipped: scrolled away from monolith.');
+                      cleanupListeners();
                     }
-                  }, 8000);
+                  }, 12000);
                 }
               });
             }
