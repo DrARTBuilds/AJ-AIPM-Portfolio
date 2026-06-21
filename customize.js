@@ -1696,10 +1696,6 @@ const videoModalSourceCode = `
 window.voyageAboutVideoUrl = "${config.about_video_url || 'https://assets.mixkit.co/videos/preview/mixkit-keyboard-of-a-computer-with-rgb-lights-40096-large.mp4'}";
 window.voyageAboutVideoBlobUrl = null;
 
-// Background fetch of the large video file is disabled to prevent network congestion on page load
-// and to avoid browser tab crashes or streaming/stuttering issues on cellular connections.
-// The browser will stream the video directly from the URL when the modal is opened.
-
 if (typeof document !== 'undefined') {
   const injectVideoModal = () => {
     if (document.getElementById('voyage-video-modal')) return;
@@ -1725,6 +1721,24 @@ if (typeof document !== 'undefined') {
       pointer-events: none;
       transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     \`;
+
+    const videoUrl = window.voyageAboutVideoBlobUrl || window.voyageAboutVideoUrl;
+    const isYoutube = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be');
+    
+    let playerHtml = '';
+    if (isYoutube) {
+      let ytId = '';
+      if (videoUrl.includes('youtu.be/')) {
+        ytId = videoUrl.split('youtu.be/')[1].split('?')[0];
+      } else if (videoUrl.includes('v=')) {
+        ytId = videoUrl.split('v=')[1].split('&')[0];
+      } else if (videoUrl.includes('embed/')) {
+        ytId = videoUrl.split('embed/')[1].split('?')[0];
+      }
+      playerHtml = \`<iframe id="voyage-video-element" src="https://www.youtube.com/embed/\${ytId}?autoplay=1&rel=0" style="width:100%; height:100%; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\`;
+    } else {
+      playerHtml = \`<video id="voyage-video-element" src="\${videoUrl}" controls preload="auto" playsinline webkit-playsinline style="width:100%; height:100%; object-fit:contain; background:#000;"></video>\`;
+    }
 
     modal.innerHTML = \`
       <div id="video-modal-content" style="
@@ -1761,7 +1775,9 @@ if (typeof document !== 'undefined') {
           box-shadow: 0 2px 8px rgba(0,0,0,0.4);
         ">✕</button>
 
-        <div id="video-player-container" style="width: 100%; height: 100%;"></div>
+        <div id="video-player-container" style="width: 100%; height: 100%;">
+          \${playerHtml}
+        </div>
       </div>
     \`;
 
@@ -1772,9 +1788,12 @@ if (typeof document !== 'undefined') {
       modal.style.opacity = '0';
       modal.style.pointerEvents = 'none';
       document.getElementById('video-modal-content').style.transform = 'scale(0.9)';
-      setTimeout(() => {
-        document.getElementById('video-player-container').innerHTML = '';
-      }, 400);
+      
+      const videoEl = document.getElementById('voyage-video-element');
+      if (videoEl && !isYoutube) {
+        videoEl.pause();
+        videoEl.currentTime = 0;
+      }
 
       // Reveal the scroll prompt
       window.scrollPromptRevealed = true;
@@ -1815,6 +1834,35 @@ if (typeof document !== 'undefined') {
       closeBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.4)';
     });
 
+    // Whitelist video element for unmuted autoplay on first document gesture
+    if (!isYoutube) {
+      const prePlayVideo = () => {
+        const videoEl = document.getElementById('voyage-video-element');
+        if (videoEl && videoEl.paused) {
+          videoEl.muted = false;
+          videoEl.play()
+            .then(() => {
+              videoEl.pause();
+              videoEl.currentTime = 0;
+              console.log('🎬 Video pre-play approved via document gesture.');
+              cleanupPrePlay();
+            })
+            .catch(err => {
+              console.warn('🎬 Document gesture pre-play pending/failed:', err);
+            });
+        }
+      };
+      
+      const cleanupPrePlay = () => {
+        events.forEach(evt => document.removeEventListener(evt, prePlayVideo));
+      };
+      
+      const events = ['click', 'touchstart', 'scroll', 'wheel', 'keydown', 'pointerdown'];
+      events.forEach(evt => {
+        document.addEventListener(evt, prePlayVideo, { passive: true });
+      });
+    }
+
     window.addEventListener('open-about-video', () => {
       if (window.aboutVideoTimer) {
         clearTimeout(window.aboutVideoTimer);
@@ -1837,12 +1885,8 @@ if (typeof document !== 'undefined') {
         }
       }
 
-      // Use preloaded Blob URL if available, else direct stream
-      const videoUrl = window.voyageAboutVideoBlobUrl || window.voyageAboutVideoUrl;
-      const container = document.getElementById('video-player-container');
-      
-      let playerHtml = '';
-      if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+      if (isYoutube) {
+        const container = document.getElementById('video-player-container');
         let ytId = '';
         if (videoUrl.includes('youtu.be/')) {
           ytId = videoUrl.split('youtu.be/')[1].split('?')[0];
@@ -1851,36 +1895,29 @@ if (typeof document !== 'undefined') {
         } else if (videoUrl.includes('embed/')) {
           ytId = videoUrl.split('embed/')[1].split('?')[0];
         }
-        playerHtml = \`<iframe src="https://www.youtube.com/embed/\${ytId}?autoplay=1&rel=0" style="width:100%; height:100%; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\`;
+        container.innerHTML = \`<iframe id="voyage-video-element" src="https://www.youtube.com/embed/\${ytId}?autoplay=1&rel=0" style="width:100%; height:100%; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\`;
       } else {
-        // High-performance video player tag
-        playerHtml = \`<video src="\${videoUrl}" autoplay controls preload="auto" playsinline webkit-playsinline style="width:100%; height:100%; object-fit:contain; background:#000;"></video>\`;
-      }
-      
-      container.innerHTML = playerHtml;
-      
-      // Auto-trigger video play if it is a video element
-      const videoEl = container.querySelector('video');
-      if (videoEl) {
-        videoEl.addEventListener('ended', closeModal);
-        videoEl.muted = false; // Ensure unmuted audio
-        videoEl.currentTime = 0; // Force play from start!
-        videoEl.play().catch(e => {
-          console.warn('🎬 Unmuted video autoplay was blocked by browser. Video remains paused.', e);
-          
-          // Fallback: wait for any click/touchstart on the modal to play unmuted
-          const playOnGesture = (evt) => {
-            if (evt.target && evt.target.id === 'btn-close-video') return;
-            if (videoEl.paused) {
-              videoEl.currentTime = 0; // Force play from start on gesture!
-              videoEl.play().catch(err => console.error('Failed to play video on gesture:', err));
-            }
-            modal.removeEventListener('click', playOnGesture);
-            modal.removeEventListener('touchstart', playOnGesture);
-          };
-          modal.addEventListener('click', playOnGesture);
-          modal.addEventListener('touchstart', playOnGesture);
-        });
+        const videoEl = document.getElementById('voyage-video-element');
+        if (videoEl) {
+          videoEl.currentTime = 0;
+          videoEl.muted = false; // Ensure unmuted audio
+          videoEl.play().catch(e => {
+            console.warn('🎬 Playback failed on auto-open. Video remains paused.', e);
+            
+            // Fallback: wait for any click/touchstart on the modal to play unmuted
+            const playOnGesture = (evt) => {
+              if (evt.target && evt.target.id === 'btn-close-video') return;
+              if (videoEl.paused) {
+                videoEl.currentTime = 0; // Force play from start on gesture!
+                videoEl.play().catch(err => console.error('Failed to play video on gesture:', err));
+              }
+              modal.removeEventListener('click', playOnGesture);
+              modal.removeEventListener('touchstart', playOnGesture);
+            };
+            modal.addEventListener('click', playOnGesture);
+            modal.addEventListener('touchstart', playOnGesture);
+          });
+        }
       }
       
       modal.style.opacity = '1';
