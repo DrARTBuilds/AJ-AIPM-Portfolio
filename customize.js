@@ -688,6 +688,18 @@ if (modifiedJs.includes(originalLoaderComplete)) {
   console.log('❌ Failed to locate React loader-complete callback (g) in Javascript file!');
 }
 
+// 3.991. PATCH REACT AUDIO PROVIDER Vte FOR AUTOPLAY AND INITIALIZATION ON LOAD
+const originalAudioProvider = 'function Vte({children:r}){const e=xe.useRef(null),[t,n]=xe.useState(!1),[i,s]=xe.useState(.3),a=xe.useCallback(()=>{e.current&&(e.current.play().catch(d=>console.log("Play error:",d)),n(!0))},[]),o=xe.useCallback(()=>{e.current&&(e.current.pause(),n(!1))},[]),u=xe.useCallback(()=>{t?o():a()},[t,a,o]),c=xe.useCallback(d=>{const g=Math.max(0,Math.min(1,d));s(g),e.current&&(e.current.volume=g)},[]);return q.jsxs(DR.Provider,{value:{isPlaying:t,play:a,pause:o,toggle:u,volume:i,setVolumeLevel:c,audioRef:e},children:[r,q.jsx("audio",{ref:e,src:"/music/background.mp3",loop:!0,volume:.2})]})';
+
+const targetAudioProvider = 'function Vte({children:r}){const e=xe.useRef(null),[t,n]=xe.useState(!1),[i,s]=xe.useState(.3),a=xe.useCallback(()=>{e.current&&(e.current.play().catch(d=>console.log("Play error:",d)),n(!0))},[]),o=xe.useCallback(()=>{e.current&&(e.current.pause(),n(!1))},[]),u=xe.useCallback(()=>{t?o():a()},[t,a,o]),c=xe.useCallback(d=>{const g=Math.max(0,Math.min(1,d));s(g),e.current&&(e.current.volume=g)},[]);xe.useEffect(()=>{if(e.current){e.current.play().then(()=>{n(!0)}).catch(()=>{n(!1)})}},[]);return q.jsxs(DR.Provider,{value:{isPlaying:t,play:a,pause:o,toggle:u,volume:i,setVolumeLevel:c,audioRef:e},children:[r,q.jsx("audio",{ref:e,src:"/music/background.mp3",loop:!0,autoPlay:!0,volume:.2})]})';
+
+if (modifiedJs.includes(originalAudioProvider)) {
+  modifiedJs = modifiedJs.replace(originalAudioProvider, targetAudioProvider);
+  console.log('✅ Patched React Audio Provider (Vte) to enable initial autoplay and status detection.');
+} else {
+  console.log('❌ Failed to locate React Audio Provider (Vte) in Javascript file!');
+}
+
 
 
 // 4. INJECT WEATHER SYSTEM INTO R3F CANVAS
@@ -1852,6 +1864,7 @@ if (typeof document !== 'undefined') {
       if (videoEl) {
         videoEl.addEventListener('ended', closeModal);
         videoEl.muted = false; // Ensure unmuted audio
+        videoEl.currentTime = 0; // Force play from start!
         videoEl.play().catch(e => {
           console.warn('🎬 Unmuted video autoplay was blocked by browser. Video remains paused.', e);
           
@@ -1859,6 +1872,7 @@ if (typeof document !== 'undefined') {
           const playOnGesture = (evt) => {
             if (evt.target && evt.target.id === 'btn-close-video') return;
             if (videoEl.paused) {
+              videoEl.currentTime = 0; // Force play from start on gesture!
               videoEl.play().catch(err => console.error('Failed to play video on gesture:', err));
             }
             modal.removeEventListener('click', playOnGesture);
