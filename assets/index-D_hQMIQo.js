@@ -6196,13 +6196,21 @@ if (typeof document !== 'undefined') {
       const videoEl = container.querySelector('video');
       if (videoEl) {
         videoEl.addEventListener('ended', closeModal);
-        // Try playing unmuted first. If blocked by browser autoplay policies, play muted as fallback.
+        videoEl.muted = false; // Ensure unmuted audio
         videoEl.play().catch(e => {
-          console.warn('🎬 Unmuted video autoplay was blocked by browser. Retrying muted...', e);
-          videoEl.muted = true;
-          videoEl.play().catch(err2 => {
-            console.error('🎬 Muted video autoplay also failed:', err2);
-          });
+          console.warn('🎬 Unmuted video autoplay was blocked by browser. Video remains paused.', e);
+          
+          // Fallback: wait for any click/touchstart on the modal to play unmuted
+          const playOnGesture = (evt) => {
+            if (evt.target && evt.target.id === 'btn-close-video') return;
+            if (videoEl.paused) {
+              videoEl.play().catch(err => console.error('Failed to play video on gesture:', err));
+            }
+            modal.removeEventListener('click', playOnGesture);
+            modal.removeEventListener('touchstart', playOnGesture);
+          };
+          modal.addEventListener('click', playOnGesture);
+          modal.addEventListener('touchstart', playOnGesture);
         });
       }
       

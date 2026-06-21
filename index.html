@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="/src/style.css" rel="stylesheet">
     <title>Ajay Tummeti | PM Portfolio</title>
-    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1782010964200"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1782010964200">
+    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1782011741227"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1782011741227">
   
     <!-- Microsoft Clarity -->
     <script type="text/javascript">
@@ -85,27 +85,58 @@
       // Audio Autoplay Recovery Helper (resumes blocked HTML5 audio on first user gesture)
       (function() {
         const events = ['click', 'touchstart', 'scroll', 'wheel', 'keydown', 'pointerdown'];
-        const startAudioOnInteraction = () => {
+        window.userInteracted = false;
+        
+        const handleInteraction = () => {
+          window.userInteracted = true;
+          playBackgroundMusic();
+        };
+
+        const playBackgroundMusic = () => {
           const bgAudio = document.querySelector('audio[src*="background.mp3"]') || document.querySelector('audio');
-          const bgMusicBtn = document.querySelector('button[title="Pause"]');
-          if (bgAudio && bgMusicBtn) {
+          if (bgAudio && window.userInteracted) {
             if (bgAudio.paused) {
-              console.log('🎵 User interaction detected. Forcing background music play()...');
+              console.log('🎵 Playing background music...');
               bgAudio.play()
                 .then(() => {
-                  events.forEach(evt => window.removeEventListener(evt, startAudioOnInteraction));
+                  console.log('🎵 Background music started successfully!');
+                  syncReactButton();
                 })
                 .catch(err => {
-                  console.warn('⚠️ Forced audio play failed:', err);
+                  console.warn('⚠️ Audio play failed:', err);
                 });
             } else {
-              events.forEach(evt => window.removeEventListener(evt, startAudioOnInteraction));
+              syncReactButton();
             }
           }
         };
+
+        const syncReactButton = () => {
+          const syncInterval = setInterval(() => {
+            const playBtn = document.querySelector('button[title="Play"]');
+            if (playBtn) {
+              console.log('🎵 Syncing React play button state...');
+              playBtn.click();
+              clearInterval(syncInterval);
+              events.forEach(evt => window.removeEventListener(evt, handleInteraction));
+              if (window.audioCheckInterval) clearInterval(window.audioCheckInterval);
+            }
+            const pauseBtn = document.querySelector('button[title="Pause"]');
+            if (pauseBtn) {
+              console.log('🎵 React already synced to Pause state.');
+              clearInterval(syncInterval);
+              events.forEach(evt => window.removeEventListener(evt, handleInteraction));
+              if (window.audioCheckInterval) clearInterval(window.audioCheckInterval);
+            }
+          }, 100);
+          setTimeout(() => clearInterval(syncInterval), 15000);
+        };
+
         events.forEach(evt => {
-          window.addEventListener(evt, startAudioOnInteraction, { passive: true });
+          window.addEventListener(evt, handleInteraction, { passive: true });
         });
+
+        window.audioCheckInterval = setInterval(playBackgroundMusic, 200);
       })();
 
       // Cinematic Auto-Scroll & Video Autoplay Coordinator
@@ -182,7 +213,7 @@
                 }
               });
             }
-          }, 800);
+          }, 100);
         });
       })();
     </script>
