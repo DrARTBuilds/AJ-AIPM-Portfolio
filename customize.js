@@ -1783,16 +1783,31 @@ if (typeof document !== 'undefined') {
 
     document.body.appendChild(modal);
 
+    const videoEl = document.getElementById('voyage-video-element');
+    if (videoEl && !isYoutube) {
+      videoEl.volume = 0.002; // Set extremely quiet (inaudible) to prime unmuted state
+      
+      // Auto-close modal when video ends, or loop silently if playing in background
+      videoEl.addEventListener('ended', () => {
+        if (modal.style.opacity === '1') {
+          closeModal();
+        } else {
+          videoEl.currentTime = 0;
+          videoEl.play().catch(e => console.warn('🎬 Background silent loop play failed:', e));
+        }
+      });
+    }
+
     const closeBtn = document.getElementById('btn-close-video');
     const closeModal = () => {
       modal.style.opacity = '0';
       modal.style.pointerEvents = 'none';
       document.getElementById('video-modal-content').style.transform = 'scale(0.9)';
       
-      const videoEl = document.getElementById('voyage-video-element');
       if (videoEl && !isYoutube) {
         videoEl.pause();
         videoEl.currentTime = 0;
+        videoEl.volume = 0.002; // Reset to silent
       }
 
       // Reveal the scroll prompt
@@ -1834,21 +1849,19 @@ if (typeof document !== 'undefined') {
       closeBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.4)';
     });
 
-    // Whitelist video element for unmuted autoplay on first document gesture
+    // Prime the video element unmuted (but silent) on the user's first gesture
     if (!isYoutube) {
       const prePlayVideo = () => {
-        const videoEl = document.getElementById('voyage-video-element');
         if (videoEl && videoEl.paused) {
           videoEl.muted = false;
+          videoEl.volume = 0.002; // Keep inaudible
           videoEl.play()
             .then(() => {
-              videoEl.pause();
-              videoEl.currentTime = 0;
-              console.log('🎬 Video pre-play approved via document gesture.');
+              console.log('🎬 Video primed unmuted (silent background playback started).');
               cleanupPrePlay();
             })
             .catch(err => {
-              console.warn('🎬 Document gesture pre-play pending/failed:', err);
+              console.warn('🎬 Document gesture priming pending/failed:', err);
             });
         }
       };
@@ -1897,10 +1910,22 @@ if (typeof document !== 'undefined') {
         }
         container.innerHTML = \`<iframe id="voyage-video-element" src="https://www.youtube.com/embed/\${ytId}?autoplay=1&rel=0" style="width:100%; height:100%; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>\`;
       } else {
-        const videoEl = document.getElementById('voyage-video-element');
         if (videoEl) {
-          videoEl.currentTime = 0;
+          videoEl.currentTime = 0; // Seek to beginning
+          videoEl.volume = 1.0; // Restore full volume
           videoEl.muted = false; // Ensure unmuted audio
+          
+          // Force reset time on loadedmetadata or first frame play
+          const resetHandler = () => {
+            videoEl.currentTime = 0;
+            console.log('🎬 Video initialized/playing: forcing currentTime = 0');
+          };
+          if (videoEl.readyState >= 1) {
+            videoEl.currentTime = 0;
+          } else {
+            videoEl.addEventListener('loadedmetadata', resetHandler, { once: true });
+          }
+          
           videoEl.play().catch(e => {
             console.warn('🎬 Playback failed on auto-open. Video remains paused.', e);
             
@@ -1908,7 +1933,8 @@ if (typeof document !== 'undefined') {
             const playOnGesture = (evt) => {
               if (evt.target && evt.target.id === 'btn-close-video') return;
               if (videoEl.paused) {
-                videoEl.currentTime = 0; // Force play from start on gesture!
+                videoEl.currentTime = 0;
+                videoEl.volume = 1.0;
                 videoEl.play().catch(err => console.error('Failed to play video on gesture:', err));
               }
               modal.removeEventListener('click', playOnGesture);
