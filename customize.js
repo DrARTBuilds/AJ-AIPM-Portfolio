@@ -1684,22 +1684,9 @@ const videoModalSourceCode = `
 window.voyageAboutVideoUrl = "${config.about_video_url || 'https://assets.mixkit.co/videos/preview/mixkit-keyboard-of-a-computer-with-rgb-lights-40096-large.mp4'}";
 window.voyageAboutVideoBlobUrl = null;
 
-// Eagerly preload the video in the background as a Blob URL to bypass loading lag and moov-atom seek latency
-if (typeof window !== 'undefined' && !window.voyageAboutVideoUrl.includes('youtube.com') && !window.voyageAboutVideoUrl.includes('youtu.be')) {
-  console.log('🚀 Preloading video in the background for lag-free playback...');
-  fetch(window.voyageAboutVideoUrl)
-    .then(response => {
-      if (!response.ok) throw new Error('Failed to load video file');
-      return response.blob();
-    })
-    .then(blob => {
-      window.voyageAboutVideoBlobUrl = URL.createObjectURL(blob);
-      console.log('✅ About Me video preloaded successfully into browser memory blob:', window.voyageAboutVideoBlobUrl);
-    })
-    .catch(err => {
-      console.warn('⚠️ Background video preloading failed (will use direct stream):', err);
-    });
-}
+// Background fetch of the large video file is disabled to prevent network congestion on page load
+// and to avoid browser tab crashes or streaming/stuttering issues on cellular connections.
+// The browser will stream the video directly from the URL when the modal is opened.
 
 if (typeof document !== 'undefined') {
   const injectVideoModal = () => {
@@ -1864,7 +1851,14 @@ if (typeof document !== 'undefined') {
       const videoEl = container.querySelector('video');
       if (videoEl) {
         videoEl.addEventListener('ended', closeModal);
-        videoEl.play().catch(e => console.warn('Autoplay play() promise caught:', e));
+        // Try playing unmuted first. If blocked by browser autoplay policies, play muted as fallback.
+        videoEl.play().catch(e => {
+          console.warn('🎬 Unmuted video autoplay was blocked by browser. Retrying muted...', e);
+          videoEl.muted = true;
+          videoEl.play().catch(err2 => {
+            console.error('🎬 Muted video autoplay also failed:', err2);
+          });
+        });
       }
       
       modal.style.opacity = '1';
@@ -2188,13 +2182,8 @@ let modifiedHtml = htmlCode;
 // Force the HTML page to render a dark background color as early as possible (before stylesheets load)
 modifiedHtml = modifiedHtml.replace('<head>', '<head>\n    <style>html, body { background-color: #090a0f !important; margin: 0; padding: 0; width: 100%; height: 100%; }</style>');
 
-// Inject high-performance video preload tag to start downloading the video assets immediately
-const videoUrl = config.about_video_url || '/music/about_me.mp4';
-if (!videoUrl.includes('youtube.com') && !videoUrl.includes('youtu.be')) {
-  const preloadTag = `\n    <link rel="preload" as="video" type="video/mp4" href="${videoUrl}">`;
-  modifiedHtml = modifiedHtml.replace('</head>', `${preloadTag}\n  </head>`);
-  console.log('✅ Injected HTML high-performance video preload link.');
-}
+// HTML video preload tag is disabled to prevent parallel network requests for the large 34MB video
+// which chokes the browser connection and causes loading stutters.
 
 // Inject Microsoft Clarity tracking code
 if (config.clarity_project_id) {
@@ -2361,7 +2350,7 @@ const overscrollStyle = `
                 duration: 5.5,
                 easing: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
                 onComplete: () => {
-                  console.log('🎬 Scroll complete. Waiting 12s for user to read Ruin stone...');
+                  console.log('🎬 Scroll complete. Waiting 9s for user to read Ruin stone...');
                   
                   let autoplayCancelled = false;
 
@@ -2399,7 +2388,7 @@ const overscrollStyle = `
                     const currentScroll = window.lenis ? window.lenis.scroll : window.scrollY;
                     const isNearMonolith = Math.abs(currentScroll - 3300) < 200;
                     if (isNearMonolith) {
-                      console.log('🎬 12s delay finished. Starting further auto-scroll past Ruin stone...');
+                      console.log('🎬 9s delay finished. Starting further auto-scroll past Ruin stone...');
                       
                       window.lenis.scrollTo(3800, {
                         duration: 3.0,
@@ -2421,7 +2410,7 @@ const overscrollStyle = `
                       console.log('🎬 Autoplay skipped: scrolled away from monolith.');
                       cleanupListeners();
                     }
-                  }, 12000);
+                  }, 9000);
                 }
               });
             }

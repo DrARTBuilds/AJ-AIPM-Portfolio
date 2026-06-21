@@ -6029,22 +6029,9 @@ if (typeof document !== 'undefined') {
 window.voyageAboutVideoUrl = "/music/about_me.mp4";
 window.voyageAboutVideoBlobUrl = null;
 
-// Eagerly preload the video in the background as a Blob URL to bypass loading lag and moov-atom seek latency
-if (typeof window !== 'undefined' && !window.voyageAboutVideoUrl.includes('youtube.com') && !window.voyageAboutVideoUrl.includes('youtu.be')) {
-  console.log('🚀 Preloading video in the background for lag-free playback...');
-  fetch(window.voyageAboutVideoUrl)
-    .then(response => {
-      if (!response.ok) throw new Error('Failed to load video file');
-      return response.blob();
-    })
-    .then(blob => {
-      window.voyageAboutVideoBlobUrl = URL.createObjectURL(blob);
-      console.log('✅ About Me video preloaded successfully into browser memory blob:', window.voyageAboutVideoBlobUrl);
-    })
-    .catch(err => {
-      console.warn('⚠️ Background video preloading failed (will use direct stream):', err);
-    });
-}
+// Background fetch of the large video file is disabled to prevent network congestion on page load
+// and to avoid browser tab crashes or streaming/stuttering issues on cellular connections.
+// The browser will stream the video directly from the URL when the modal is opened.
 
 if (typeof document !== 'undefined') {
   const injectVideoModal = () => {
@@ -6209,7 +6196,14 @@ if (typeof document !== 'undefined') {
       const videoEl = container.querySelector('video');
       if (videoEl) {
         videoEl.addEventListener('ended', closeModal);
-        videoEl.play().catch(e => console.warn('Autoplay play() promise caught:', e));
+        // Try playing unmuted first. If blocked by browser autoplay policies, play muted as fallback.
+        videoEl.play().catch(e => {
+          console.warn('🎬 Unmuted video autoplay was blocked by browser. Retrying muted...', e);
+          videoEl.muted = true;
+          videoEl.play().catch(err2 => {
+            console.error('🎬 Muted video autoplay also failed:', err2);
+          });
+        });
       }
       
       modal.style.opacity = '1';

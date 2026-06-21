@@ -7,10 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="/src/style.css" rel="stylesheet">
     <title>Ajay Tummeti | PM Portfolio</title>
-    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1782010600532"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1782010600532">
-  
-    <link rel="preload" as="video" type="video/mp4" href="/music/about_me.mp4">
+    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1782010964200"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1782010964200">
   
     <!-- Microsoft Clarity -->
     <script type="text/javascript">
@@ -120,7 +118,7 @@
                 duration: 5.5,
                 easing: (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
                 onComplete: () => {
-                  console.log('🎬 Scroll complete. Waiting 12s for user to read Ruin stone...');
+                  console.log('🎬 Scroll complete. Waiting 9s for user to read Ruin stone...');
                   
                   let autoplayCancelled = false;
 
@@ -158,7 +156,7 @@
                     const currentScroll = window.lenis ? window.lenis.scroll : window.scrollY;
                     const isNearMonolith = Math.abs(currentScroll - 3300) < 200;
                     if (isNearMonolith) {
-                      console.log('🎬 12s delay finished. Starting further auto-scroll past Ruin stone...');
+                      console.log('🎬 9s delay finished. Starting further auto-scroll past Ruin stone...');
                       
                       window.lenis.scrollTo(3800, {
                         duration: 3.0,
@@ -180,7 +178,7 @@
                       console.log('🎬 Autoplay skipped: scrolled away from monolith.');
                       cleanupListeners();
                     }
-                  }, 12000);
+                  }, 9000);
                 }
               });
             }
