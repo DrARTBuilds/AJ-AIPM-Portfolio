@@ -2468,6 +2468,27 @@ const overscrollStyle = `
       // Cinematic Auto-Scroll & Video Autoplay Coordinator
       (function() {
         window.addEventListener('experience-started', () => {
+          // Add scroll listener for auto-opening video when crossing 3700px (manual or auto-scroll)
+          const checkScrollPosition = () => {
+            if (window.aboutVideoOpened) return;
+            const currentScroll = window.lenis ? window.lenis.scroll : window.scrollY;
+            if (currentScroll >= 3700) {
+              console.log('🎬 Scroll position crossed 3700. Auto-opening video...');
+              window.aboutVideoOpened = true;
+              window.dispatchEvent(new CustomEvent('open-about-video'));
+              if (window.aboutVideoTimer) {
+                clearTimeout(window.aboutVideoTimer);
+                window.aboutVideoTimer = null;
+              }
+            }
+          };
+
+          if (window.lenis) {
+            window.lenis.on('scroll', checkScrollPosition);
+          } else {
+            window.addEventListener('scroll', checkScrollPosition, { passive: true });
+          }
+
           setTimeout(() => {
             if (window.lenis) {
               console.log('🎬 Experience started. Triggering auto-scroll to monolith...');
@@ -2487,7 +2508,6 @@ const overscrollStyle = `
                         clearTimeout(window.aboutVideoTimer);
                         window.aboutVideoTimer = null;
                       }
-                      window.aboutVideoOpened = true;
                     }
                     cleanupListeners();
                   };

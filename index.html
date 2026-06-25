@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="/src/style.css" rel="stylesheet">
     <title>Ajay Tummeti | PM Portfolio</title>
-    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1782401371505"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1782401371507">
+    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1782411409094"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1782411409094">
   
     <!-- Microsoft Clarity -->
     <script type="text/javascript">
@@ -142,6 +142,27 @@
       // Cinematic Auto-Scroll & Video Autoplay Coordinator
       (function() {
         window.addEventListener('experience-started', () => {
+          // Add scroll listener for auto-opening video when crossing 3700px (manual or auto-scroll)
+          const checkScrollPosition = () => {
+            if (window.aboutVideoOpened) return;
+            const currentScroll = window.lenis ? window.lenis.scroll : window.scrollY;
+            if (currentScroll >= 3700) {
+              console.log('🎬 Scroll position crossed 3700. Auto-opening video...');
+              window.aboutVideoOpened = true;
+              window.dispatchEvent(new CustomEvent('open-about-video'));
+              if (window.aboutVideoTimer) {
+                clearTimeout(window.aboutVideoTimer);
+                window.aboutVideoTimer = null;
+              }
+            }
+          };
+
+          if (window.lenis) {
+            window.lenis.on('scroll', checkScrollPosition);
+          } else {
+            window.addEventListener('scroll', checkScrollPosition, { passive: true });
+          }
+
           setTimeout(() => {
             if (window.lenis) {
               console.log('🎬 Experience started. Triggering auto-scroll to monolith...');
@@ -161,7 +182,6 @@
                         clearTimeout(window.aboutVideoTimer);
                         window.aboutVideoTimer = null;
                       }
-                      window.aboutVideoOpened = true;
                     }
                     cleanupListeners();
                   };
