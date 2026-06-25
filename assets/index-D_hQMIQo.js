@@ -6118,15 +6118,12 @@ if (typeof document !== 'undefined') {
 
     const videoEl = document.getElementById('voyage-video-element');
     if (videoEl && !isYoutube) {
-      videoEl.volume = 0.002; // Set extremely quiet (inaudible) to prime unmuted state
+      videoEl.volume = 1.0; // Ready for full volume
       
-      // Auto-close modal when video ends, or loop silently if playing in background
+      // Auto-close modal when video ends
       videoEl.addEventListener('ended', () => {
         if (modal.style.opacity === '1') {
           closeModal();
-        } else {
-          videoEl.currentTime = 0;
-          videoEl.play().catch(e => console.warn('🎬 Background silent loop play failed:', e));
         }
       });
     }
@@ -6190,7 +6187,10 @@ if (typeof document !== 'undefined') {
           videoEl.volume = 0.002; // Keep inaudible
           videoEl.play()
             .then(() => {
-              console.log('🎬 Video primed unmuted (silent background playback started).');
+              console.log('🎬 Video primed unmuted. Pausing and resetting to 0:00...');
+              videoEl.pause();
+              videoEl.currentTime = 0;
+              videoEl.volume = 1.0; // Restore volume beforehand so that subsequent play is full volume
               cleanupPrePlay();
             })
             .catch(err => {
@@ -6258,6 +6258,15 @@ if (typeof document !== 'undefined') {
           } else {
             videoEl.addEventListener('loadedmetadata', resetHandler, { once: true });
           }
+          
+          // Force starting from 0:00 on playing to avoid any cached seek restoration
+          const forceStartFromZero = () => {
+            if (videoEl.currentTime > 0.5) {
+              videoEl.currentTime = 0;
+              console.log('🎬 Video forced back to 0:00 on playing');
+            }
+          };
+          videoEl.addEventListener('playing', forceStartFromZero, { once: true });
           
           videoEl.play().catch(e => {
             console.warn('🎬 Playback failed on auto-open. Video remains paused.', e);
