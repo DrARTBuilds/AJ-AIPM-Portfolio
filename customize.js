@@ -2259,6 +2259,26 @@ if (modifiedJs.includes(originalLoaderGlow)) {
   }
 }
 
+// 5.1 Enable WebGL compilation in background (remove conditional hidden)
+const originalCanvasPinHidden = 'className:`h-screen w-full ${i?"hidden":""}`';
+const targetCanvasPinHidden = 'className:"h-screen w-full"';
+if (modifiedJs.includes(originalCanvasPinHidden)) {
+  modifiedJs = modifiedJs.replace(originalCanvasPinHidden, targetCanvasPinHidden);
+  console.log('   ✅ Removed conditional hidden from canvas wrapper to enable background WebGL initialization.');
+} else {
+  console.log('   ⚠️ Could not find canvas wrapper hidden class in JS.');
+}
+
+// 5.2 Shorten loader timeout from 5 seconds to 2.5 seconds and trigger smooth fade out
+const originalLoaderTimeout = 's&&No.to(s,{opacity:0,duration:.8,ease:"power2.inOut",pointerEvents:"none"}),r&&r()},5e3)';
+const targetLoaderTimeout = 's?No.to(s,{opacity:0,duration:.8,ease:"power2.inOut",pointerEvents:"none",onComplete:r}):r&&r()},2.5e3)';
+if (modifiedJs.includes(originalLoaderTimeout)) {
+  modifiedJs = modifiedJs.replace(originalLoaderTimeout, targetLoaderTimeout);
+  console.log('   ✅ Shortened loader timeout to 2.5 seconds and enabled smooth cross-fade.');
+} else {
+  console.log('   ⚠️ Could not find loader timeout in JS.');
+}
+
 // Write the modified JS
 try {
   fs.writeFileSync(JS_PATH, modifiedJs, 'utf8');
