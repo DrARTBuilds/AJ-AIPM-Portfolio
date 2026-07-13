@@ -5,10 +5,24 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="/src/style.css" rel="stylesheet">
+    
     <title>Ajay Tummeti | PM Portfolio</title>
-    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1783812664340"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1783812664340">
+    <script type="module" crossorigin src="/assets/index-D_hQMIQo.js?v=1783943786263"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CNr_ZrEO.css?v=1783943786263">
+  
+    <!-- Service Worker Registration -->
+    <script>
+      window.voyageAssetsLoaded = false;
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then((reg) => {
+            console.log('✅ ServiceWorker registered:', reg.scope);
+          }).catch((err) => {
+            console.error('❌ ServiceWorker registration failed:', err);
+          });
+        });
+      }
+    </script>
   
     <!-- Microsoft Clarity -->
     <script type="text/javascript">

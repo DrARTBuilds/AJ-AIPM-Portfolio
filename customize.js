@@ -2269,14 +2269,54 @@ if (modifiedJs.includes(originalCanvasPinHidden)) {
   console.log('   ⚠️ Could not find canvas wrapper hidden class in JS.');
 }
 
-// 5.2 Shorten loader timeout from 5 seconds to 2.5 seconds and trigger smooth fade out
-const originalLoaderTimeout = 's&&No.to(s,{opacity:0,duration:.8,ease:"power2.inOut",pointerEvents:"none"}),r&&r()},5e3)';
-const targetLoaderTimeout = 's?No.to(s,{opacity:0,duration:.8,ease:"power2.inOut",pointerEvents:"none",onComplete:r}):r&&r()},2.5e3)';
+// 5.2 Shorten loader timeout from 5 seconds and sync with Suspense load detector
+const originalLoaderTimeout = 'xe.useEffect(()=>{const i=setTimeout(()=>{const s=t.current?.closest(".loader-container");s&&No.to(s,{opacity:0,duration:.8,ease:"power2.inOut",pointerEvents:"none"}),r&&r()},5e3);return()=>clearTimeout(i)},[r])';
+
+const targetLoaderTimeout = `xe.useEffect(()=>{
+  let minTimeElapsed = false;
+  const tryComplete = () => {
+    if (minTimeElapsed && window.voyageAssetsLoaded) {
+      const s = t.current?.closest(".loader-container");
+      s ? No.to(s, { opacity: 0, duration: .8, ease: "power2.inOut", pointerEvents: "none", onComplete: r }) : (r && r());
+      window.removeEventListener("voyage-assets-loaded", tryComplete);
+    }
+  };
+  const timer = setTimeout(() => {
+    minTimeElapsed = true;
+    tryComplete();
+  }, 1500);
+  window.addEventListener("voyage-assets-loaded", tryComplete);
+  if (window.voyageAssetsLoaded) {
+    tryComplete();
+  }
+  const fallbackTimer = setTimeout(() => {
+    window.voyageAssetsLoaded = true;
+    minTimeElapsed = true;
+    tryComplete();
+  }, 8000);
+  return () => {
+    clearTimeout(timer);
+    clearTimeout(fallbackTimer);
+    window.removeEventListener("voyage-assets-loaded", tryComplete);
+  };
+}, [r])`;
+
 if (modifiedJs.includes(originalLoaderTimeout)) {
   modifiedJs = modifiedJs.replace(originalLoaderTimeout, targetLoaderTimeout);
-  console.log('   ✅ Shortened loader timeout to 2.5 seconds and enabled smooth cross-fade.');
+  console.log('   ✅ Synced loader timeout with Suspense load detector (1.5s min, 8s fallback).');
 } else {
   console.log('   ⚠️ Could not find loader timeout in JS.');
+}
+
+// 5.3 Inject Suspense load detector element to track asset resolution
+const originalSuspense = 'q.jsxs(xe.Suspense,{fallback:null,children:[q.jsx(GJ,{entered:r,onProjectClick:c}),q.jsx(kY,{enableZoom:!1,enabled:!1})]})';
+const targetSuspense = 'q.jsxs(xe.Suspense,{fallback:null,children:[q.jsx(GJ,{entered:r,onProjectClick:c}),q.jsx(kY,{enableZoom:!1,enabled:!1}),q.jsx(()=>{xe.useEffect(()=>{window.voyageAssetsLoaded=!0,window.dispatchEvent(new Event("voyage-assets-loaded"))},[])},{})]})';
+
+if (modifiedJs.includes(originalSuspense)) {
+  modifiedJs = modifiedJs.replace(originalSuspense, targetSuspense);
+  console.log('   ✅ Injected Suspense LoadDetector element inside the Canvas.');
+} else {
+  console.log('   ⚠️ Could not find Suspense children list in JS.');
 }
 
 // Write the modified JS
@@ -2295,6 +2335,31 @@ let modifiedHtml = htmlCode;
 
 // Force the HTML page to render a dark background color as early as possible (before stylesheets load)
 modifiedHtml = modifiedHtml.replace('<head>', '<head>\n    <style>html, body { background-color: #090a0f !important; margin: 0; padding: 0; width: 100%; height: 100%; }</style>');
+
+// Remove dead render-blocking stylesheet reference
+const deadStyleLink = '<link href="/src/style.css" rel="stylesheet">';
+if (modifiedHtml.includes(deadStyleLink)) {
+  modifiedHtml = modifiedHtml.replace(deadStyleLink, '');
+  console.log('✅ Removed dead render-blocking stylesheet link.');
+}
+
+// Inject Service Worker registration script
+const swRegistrationScript = `
+    <!-- Service Worker Registration -->
+    <script>
+      window.voyageAssetsLoaded = false;
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then((reg) => {
+            console.log('✅ ServiceWorker registered:', reg.scope);
+          }).catch((err) => {
+            console.error('❌ ServiceWorker registration failed:', err);
+          });
+        });
+      }
+    </script>`;
+modifiedHtml = modifiedHtml.replace('</head>', swRegistrationScript + '\n  </head>');
+console.log('✅ Injected Service Worker registration script.');
 
 // HTML video preload tag is disabled to prevent parallel network requests for the large 34MB video
 // which chokes the browser connection and causes loading stutters.
@@ -2706,6 +2771,98 @@ try {
 } catch (e) {
   console.error('❌ Error writing HTML file:', e.message);
   process.exit(1);
+}
+
+// 7. Write Service Worker file (sw.js)
+const SW_PATH = path.join(__dirname, 'sw.js');
+const swContent = `const CACHE_NAME = 'voyage-portfolio-cache-v2';
+const ASSETS_TO_CACHE = [
+  '/',
+  '/index.html',
+  '/font/PermanentMarker-Regular.ttf',
+  '/music/background.mp3',
+  '/images/Main1.png',
+  '/favicon.svg'
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+  
+  const url = new URL(event.request.url);
+  
+  // Cache strategy: Cache first for models, fonts, images, audio, and compiled assets.
+  const isCacheFirst = 
+    url.pathname.includes('/models/') || 
+    url.pathname.includes('/images/') || 
+    url.pathname.includes('/font/') || 
+    url.pathname.includes('/music/') || 
+    url.pathname.includes('/assets/');
+    
+  if (isCacheFirst) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        return fetch(event.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        });
+      })
+    );
+  } else {
+    // Network first (fallback to cache)
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request))
+    );
+  }
+});
+`;
+
+try {
+  fs.writeFileSync(SW_PATH, swContent, 'utf8');
+  console.log('🎉 sw.js Service Worker generated successfully!');
+} catch (e) {
+  console.error('❌ Error writing sw.js file:', e.message);
 }
 
 console.log('\n=============================================================================');
