@@ -2319,6 +2319,16 @@ if (modifiedJs.includes(originalSuspense)) {
   console.log('   ⚠️ Could not find Suspense children list in JS.');
 }
 
+// 5.4 Auto-Dilute patch for kJ (start dissolve automatically on mount without click)
+const originalKjReturn = 'return o.startDissolve=U,()=>{cancelAnimationFrame(A)';
+const targetKjReturn = 'xe.useEffect(()=>{const timer=setTimeout(()=>{U()},100);return()=>clearTimeout(timer)},[]);return o.startDissolve=U,()=>{cancelAnimationFrame(A)';
+if (modifiedJs.includes(originalKjReturn)) {
+  modifiedJs = modifiedJs.replace(originalKjReturn, targetKjReturn);
+  console.log('   ✅ Added Auto-Dilute trigger to kJ (starts 3D dissolve automatically on asset load).');
+} else {
+  console.log('   ⚠️ Could not find kJ return statement in JS.');
+}
+
 // Write the modified JS
 try {
   fs.writeFileSync(JS_PATH, modifiedJs, 'utf8');
@@ -2407,34 +2417,50 @@ const nativeLoader = `<div id="root">
   <div id="native-html-loader" style="
     position: fixed;
     inset: 0;
-    background: #090a0f;
+    background: radial-gradient(circle at center, #131722 0%, #090a0f 100%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    padding: 3rem 1.5rem;
     z-index: 99999;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: #ffffff;
+    box-sizing: border-box;
   ">
-    <div style="
-      width: 50px;
-      height: 50px;
-      border: 3px solid rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      border-top-color: #fbbf24;
-      animation: native-spin 1s linear infinite;
-      margin-bottom: 20px;
-    "></div>
-    <div style="font-size: 18px; font-weight: 300; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255, 255, 255, 0.85); margin-bottom: 8px;">Ajay Tummeti</div>
-    <div style="font-size: 12px; font-weight: 400; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4); text-transform: uppercase;">Loading 3D Experience...</div>
+    <!-- Top Bar -->
+    <div style="width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+      <div style="font-size: 15px; font-weight: 300; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.9);">Ajay Tummeti</div>
+      <div style="font-size: 11px; font-family: monospace; letter-spacing: 0.1em; padding: 4px 12px; border-radius: 9999px; background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); color: #fbbf24; text-transform: uppercase;">Product Portfolio</div>
+    </div>
+
+    <!-- Main Hero Card -->
+    <div style="width: 100%; max-width: 650px; text-align: center; display: flex; flex-direction: column; align-items: center; margin: auto 0;">
+      <h1 style="font-size: 2.75rem; font-weight: 200; letter-spacing: 0.05em; color: #ffffff; margin: 0 0 12px 0; line-height: 1.2;">Ajay Tummeti</h1>
+      <div style="font-size: 1.1rem; font-weight: 300; letter-spacing: 0.15em; color: #fbbf24; text-transform: uppercase; margin-bottom: 20px;">AI Product Manager & Systems Architect</div>
+      <p style="font-size: 0.95rem; font-weight: 300; color: rgba(255,255,255,0.7); max-width: 520px; line-height: 1.6; margin: 0 0 28px 0;">Building scalable AI platforms, data systems, and high-impact digital experiences.</p>
+      
+      <!-- Status Badge -->
+      <div style="display: inline-flex; align-items: center; gap: 10px; padding: 10px 20px; border-radius: 9999px; background: rgba(255,255,255,0.04); border: 1px solid rgba(251,191,36,0.25); backdrop-filter: blur(10px);">
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; animation: native-pulse 1.5s infinite ease-in-out;"></div>
+        <span style="font-size: 12px; font-family: monospace; letter-spacing: 0.12em; color: #fef08a; text-transform: uppercase;">✦ Preparing 3D Experience...</span>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: rgba(255,255,255,0.35); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
+      <span>Auto-launches on WebGL load</span>
+      <span>© 2026 Ajay Tummeti</span>
+    </div>
+
     <style>
-      @keyframes native-spin { to { transform: rotate(360deg); } }
+      @keyframes native-pulse { 0%, 100% { transform: scale(0.9); opacity: 0.4; } 50% { transform: scale(1.2); opacity: 1; } }
     </style>
   </div>
 </div>`;
 if (modifiedHtml.includes('<div id="root"></div>')) {
   modifiedHtml = modifiedHtml.replace('<div id="root"></div>', nativeLoader);
-  console.log('✅ Injected premium native HTML loader screen inside #root.');
+  console.log('✅ Injected premium native HTML Instant Hero loader screen inside #root.');
 }
 
 // Add overscroll-behavior to prevent pull-to-refresh on mobile
