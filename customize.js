@@ -678,12 +678,12 @@ if (modifiedJs.includes(originalStartBtn)) {
   modifiedJs = modifiedJs.replace(originalStartBtn, targetStartBtn);
 }
 
-// 3.99. PATCH REACT LOADER-COMPLETE TO FORCIBLY RESIZE AND WAKE UP THE CANVAS
+// 3.99. PATCH REACT LOADER-COMPLETE TO DIRECTLY ACTIVATE 3D EXPERIENCE (BYPASS RECONFIGURED SECONDARY CANVAS)
 const originalLoaderComplete = 'const g=()=>{s(!1),n(!0)},v=()=>{n(!1),e(!0),d()};';
-const targetLoaderComplete = 'const g=()=>{s(!1),n(!0),setTimeout(()=>{window.dispatchEvent(new Event("resize"));const cv=document.querySelector("canvas");if(cv){const rc=cv.getBoundingClientRect();cv.dispatchEvent(new PointerEvent("pointermove",{clientX:rc.left+rc.width/2,clientY:rc.top+rc.height/2,bubbles:!0}))}},50)},v=()=>{n(!1),e(!0),d(),window.dispatchEvent(new Event("experience-started"))};';
+const targetLoaderComplete = 'const g=()=>{s(!1),e(!0),d(),window.dispatchEvent(new Event("experience-started")),setTimeout(()=>{window.dispatchEvent(new Event("resize"));const cv=document.querySelector("canvas");if(cv){const rc=cv.getBoundingClientRect();cv.dispatchEvent(new PointerEvent("pointermove",{clientX:rc.left+rc.width/2,clientY:rc.top+rc.height/2,bubbles:!0}))}},50)},v=()=>{n(!1),e(!0),d(),window.dispatchEvent(new Event("experience-started"))};';
 if (modifiedJs.includes(originalLoaderComplete)) {
   modifiedJs = modifiedJs.replace(originalLoaderComplete, targetLoaderComplete);
-  console.log('✅ Patched React loader-complete callback (g) to trigger canvas wake-up and experience-started event.');
+  console.log('✅ Patched React loader-complete callback (g) to directly activate 3D experience and bypass secondary canvas.');
 } else {
   console.log('❌ Failed to locate React loader-complete callback (g) in Javascript file!');
 }
@@ -2801,10 +2801,8 @@ try {
 
 // 7. Write Service Worker file (sw.js)
 const SW_PATH = path.join(__dirname, 'sw.js');
-const swContent = `const CACHE_NAME = 'voyage-portfolio-cache-v2';
+const swContent = `const CACHE_NAME = 'voyage-portfolio-cache-v3';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
   '/font/PermanentMarker-Regular.ttf',
   '/music/background.mp3',
   '/images/Main1.png',
@@ -2840,13 +2838,13 @@ self.addEventListener('fetch', (event) => {
   
   const url = new URL(event.request.url);
   
-  // Cache strategy: Cache first for models, fonts, images, audio, and compiled assets.
+  // Cache strategy: Cache-first for heavy 3D GLB models, fonts, images, and audio.
+  // Network-first for JS bundles, HTML, and dynamic API requests.
   const isCacheFirst = 
     url.pathname.includes('/models/') || 
     url.pathname.includes('/images/') || 
     url.pathname.includes('/font/') || 
-    url.pathname.includes('/music/') || 
-    url.pathname.includes('/assets/');
+    url.pathname.includes('/music/');
     
   if (isCacheFirst) {
     event.respondWith(

@@ -1,7 +1,5 @@
-const CACHE_NAME = 'voyage-portfolio-cache-v2';
+const CACHE_NAME = 'voyage-portfolio-cache-v3';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
   '/font/PermanentMarker-Regular.ttf',
   '/music/background.mp3',
   '/images/Main1.png',
@@ -37,13 +35,13 @@ self.addEventListener('fetch', (event) => {
   
   const url = new URL(event.request.url);
   
-  // Cache strategy: Cache first for models, fonts, images, audio, and compiled assets.
+  // Cache strategy: Cache-first for heavy 3D GLB models, fonts, images, and audio.
+  // Network-first for JS bundles, HTML, and dynamic API requests.
   const isCacheFirst = 
     url.pathname.includes('/models/') || 
     url.pathname.includes('/images/') || 
     url.pathname.includes('/font/') || 
-    url.pathname.includes('/music/') || 
-    url.pathname.includes('/assets/');
+    url.pathname.includes('/music/');
     
   if (isCacheFirst) {
     event.respondWith(
