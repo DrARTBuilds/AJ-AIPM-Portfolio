@@ -2269,41 +2269,60 @@ if (modifiedJs.includes(originalCanvasPinHidden)) {
   console.log('   ⚠️ Could not find canvas wrapper hidden class in JS.');
 }
 
-// 5.2 Shorten loader timeout from 5 seconds and sync with Suspense load detector
+// 5.2 Interactive & Auto-Open Loader Transition Logic
 const originalLoaderTimeout = 'xe.useEffect(()=>{const i=setTimeout(()=>{const s=t.current?.closest(".loader-container");s&&No.to(s,{opacity:0,duration:.8,ease:"power2.inOut",pointerEvents:"none"}),r&&r()},5e3);return()=>clearTimeout(i)},[r])';
 
 const targetLoaderTimeout = `xe.useEffect(()=>{
-  let minTimeElapsed = false;
-  const tryComplete = () => {
-    if (minTimeElapsed && window.voyageAssetsLoaded) {
-      const s = t.current?.closest(".loader-container");
-      s ? No.to(s, { opacity: 0, duration: .8, ease: "power2.inOut", pointerEvents: "none", onComplete: r }) : (r && r());
-      window.removeEventListener("voyage-assets-loaded", tryComplete);
-    }
+  let completed = false;
+  let autoTimer = null;
+  const events = ["click", "pointerdown", "touchstart", "mousemove", "scroll", "wheel", "keydown"];
+
+  const executeTransition = () => {
+    if (completed) return;
+    completed = true;
+    if (autoTimer) clearTimeout(autoTimer);
+    window.removeEventListener("voyage-assets-loaded", onAssetsLoaded);
+    events.forEach(evt => window.removeEventListener(evt, executeTransition));
+
+    const s = t.current?.closest(".loader-container");
+    s ? No.to(s, { opacity: 0, duration: 1.0, ease: "power2.inOut", pointerEvents: "none", onComplete: r }) : (r && r());
   };
-  const timer = setTimeout(() => {
-    minTimeElapsed = true;
-    tryComplete();
-  }, 1500);
-  window.addEventListener("voyage-assets-loaded", tryComplete);
+
+  const onAssetsLoaded = () => {
+    const badgeText = document.getElementById("voyage-badge-text");
+    if (badgeText) {
+      badgeText.innerText = "✦ 3D Voyage Ready — Click or Move Mouse to Explore";
+    }
+    // Listen for any click or cursor movement to dissolve immediately
+    events.forEach(evt => window.addEventListener(evt, executeTransition, { passive: true, once: true }));
+    
+    // Auto-open into 3D scene after 3 seconds if no user interaction occurs
+    autoTimer = setTimeout(() => {
+      executeTransition();
+    }, 3000);
+  };
+
+  window.addEventListener("voyage-assets-loaded", onAssetsLoaded);
   if (window.voyageAssetsLoaded) {
-    tryComplete();
+    onAssetsLoaded();
   }
+
   const fallbackTimer = setTimeout(() => {
     window.voyageAssetsLoaded = true;
-    minTimeElapsed = true;
-    tryComplete();
-  }, 8000);
+    onAssetsLoaded();
+  }, 10000);
+
   return () => {
-    clearTimeout(timer);
+    if (autoTimer) clearTimeout(autoTimer);
     clearTimeout(fallbackTimer);
-    window.removeEventListener("voyage-assets-loaded", tryComplete);
+    window.removeEventListener("voyage-assets-loaded", onAssetsLoaded);
+    events.forEach(evt => window.removeEventListener(evt, executeTransition));
   };
 }, [r])`;
 
 if (modifiedJs.includes(originalLoaderTimeout)) {
   modifiedJs = modifiedJs.replace(originalLoaderTimeout, targetLoaderTimeout);
-  console.log('   ✅ Synced loader timeout with Suspense load detector (1.5s min, 8s fallback).');
+  console.log('   ✅ Synced loader with interactive click/move and 3s auto-open transition logic.');
 } else {
   console.log('   ⚠️ Could not find loader timeout in JS.');
 }

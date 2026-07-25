@@ -5053,31 +5053,50 @@ function dJ(r){
             block overflow-hidden relative w-[50vw]
             text-5xl h-16
             md:text-8xl md:h-28`,children:e.map((a,o)=>q.jsx(ff.div,{className:"absolute top-0 left-0 w-full text-right md:text-left",animate:o===r?"current":o===s?"prev":"next",variants:{current:{transition:{delay:.2,staggerChildren:.05}}},children:a.title.split("").map((u,c)=>q.jsx(ff.span,{className:"inline-block text-nowrap",variants:{current:{translateY:0,transition:{duration:.6,from:i==="prev"?-Za:Za,type:"spring",bounce:.15}},prev:{translateY:i==="prev"?Za:-Za,transition:{duration:.6,from:i==="start"?-Za:0}},next:{translateY:Za,transition:{from:Za}}},children:u},c))},o))})}),q.jsx("div",{className:"absolute right-4 md:right-auto md:left-full md:top-full md:-mt-10 bottom-8 md:bottom-auto",children:q.jsx("p",{className:"text-white w-64 text-sm font-thin italic ml-4 relative",children:e.map((a,o)=>q.jsx(ff.span,{className:"absolute top-0 left-0 w-full text-right md:text-left",animate:o===r?"current":o===s?"prev":"next",initial:{opacity:0},variants:{current:{opacity:1,transition:{duration:.8,delay:.4,from:0}}},children:a.description},o))})}),q.jsx("div",{className:"absolute left-4 bottom-0 md:left-auto md:right-6 pointer-events-auto z-20",children:q.jsx("a",{href:e[r]?.link||"#",target:"_blank",rel:"noopener noreferrer",onPointerDown:a=>{a.stopPropagation();if(e[r]?.link&&e[r].link!=="#")window.open(e[r].link,"_blank");},onClick:a=>{a.stopPropagation();},style:{pointerEvents:"all",cursor:"pointer"},className:"px-6 py-2 bg-white/10 border border-white/30 rounded hover:bg-white/20 hover:border-white/60 text-white font-light transition-all",children:"Visit →"})})]})})};function Hte({selectedProjectId:r,onClose:e}){if(r===null)return null;const[t,n]=xe.useState(r??0),{setSlide:i}=WC();return xe.useEffect(()=>{n(r??0),i(r??0)},[r,i]),NC[t]?q.jsx("div",{className:"fixed inset-0 z-60 bg-black/60 backdrop-blur-sm flex items-center justify-center pointer-events-auto",onClick:e,children:q.jsxs("div",{className:"w-full h-screen pointer-events-auto",onClick:a=>a.stopPropagation(),children:[q.jsx("button",{onClick:e,className:"absolute top-4 right-4 z-50 text-white/50 hover:text-white transition-colors",children:q.jsx("svg",{className:"w-6 h-6",fill:"none",stroke:"currentColor",viewBox:"0 0 24 24",children:q.jsx("path",{strokeLinecap:"round",strokeLinejoin:"round",strokeWidth:2,d:"M6 18L18 6M6 6l12 12"})})}),q.jsxs("div",{className:"w-full h-screen overflow-hidden relative",children:[q.jsx(zte,{}),q.jsx(EN,{className:"absolute inset-0",style:{width:"100%",height:"100%",position:"absolute"},camera:{position:[0,0,5],fov:30},gl:{outputColorSpace:Qn,toneMapping:bl},children:q.jsx(jJ,{})})]})]})}):null}function Gte({onComplete:r}){const e=xe.useRef(null),t=xe.useRef(null),n=xe.useRef(null);return xe.useEffect(()=>{const i=e.current,s=t.current;if(!i||!s)return;const a=i.querySelector("path");if(!a)return;const o=a.getTotalLength();No.set(a,{strokeDasharray:o,strokeDashoffset:o,stroke:"#fbbf24",strokeWidth:2,fill:"none",opacity:.8});const u=No.timeline({repeat:-1});return u.to(a,{strokeDashoffset:0,opacity:1,duration:3,ease:"sine.inOut"},0).to(a,{opacity:1,duration:1},3).to(a,{opacity:0,duration:1.5,ease:"power2.in"},4).set(a,{strokeDashoffset:o,opacity:.8}).to({},{duration:1}),n.current=u,()=>{n.current&&n.current.kill()}},[]),xe.useEffect(()=>{
-  let minTimeElapsed = false;
-  const tryComplete = () => {
-    if (minTimeElapsed && window.voyageAssetsLoaded) {
-      const s = t.current?.closest(".loader-container");
-      s ? No.to(s, { opacity: 0, duration: .8, ease: "power2.inOut", pointerEvents: "none", onComplete: r }) : (r && r());
-      window.removeEventListener("voyage-assets-loaded", tryComplete);
-    }
+  let completed = false;
+  let autoTimer = null;
+  const events = ["click", "pointerdown", "touchstart", "mousemove", "scroll", "wheel", "keydown"];
+
+  const executeTransition = () => {
+    if (completed) return;
+    completed = true;
+    if (autoTimer) clearTimeout(autoTimer);
+    window.removeEventListener("voyage-assets-loaded", onAssetsLoaded);
+    events.forEach(evt => window.removeEventListener(evt, executeTransition));
+
+    const s = t.current?.closest(".loader-container");
+    s ? No.to(s, { opacity: 0, duration: 1.0, ease: "power2.inOut", pointerEvents: "none", onComplete: r }) : (r && r());
   };
-  const timer = setTimeout(() => {
-    minTimeElapsed = true;
-    tryComplete();
-  }, 1500);
-  window.addEventListener("voyage-assets-loaded", tryComplete);
+
+  const onAssetsLoaded = () => {
+    const badgeText = document.getElementById("voyage-badge-text");
+    if (badgeText) {
+      badgeText.innerText = "✦ 3D Voyage Ready — Click or Move Mouse to Explore";
+    }
+    // Listen for any click or cursor movement to dissolve immediately
+    events.forEach(evt => window.addEventListener(evt, executeTransition, { passive: true, once: true }));
+    
+    // Auto-open into 3D scene after 3 seconds if no user interaction occurs
+    autoTimer = setTimeout(() => {
+      executeTransition();
+    }, 3000);
+  };
+
+  window.addEventListener("voyage-assets-loaded", onAssetsLoaded);
   if (window.voyageAssetsLoaded) {
-    tryComplete();
+    onAssetsLoaded();
   }
+
   const fallbackTimer = setTimeout(() => {
     window.voyageAssetsLoaded = true;
-    minTimeElapsed = true;
-    tryComplete();
-  }, 8000);
+    onAssetsLoaded();
+  }, 10000);
+
   return () => {
-    clearTimeout(timer);
+    if (autoTimer) clearTimeout(autoTimer);
     clearTimeout(fallbackTimer);
-    window.removeEventListener("voyage-assets-loaded", tryComplete);
+    window.removeEventListener("voyage-assets-loaded", onAssetsLoaded);
+    events.forEach(evt => window.removeEventListener(evt, executeTransition));
   };
 }, [r]),q.jsx("div",{className:"loader-container fixed inset-0 z-50 flex items-center justify-center bg-[#090a0f] transition-opacity duration-800",children:q.jsx("div",{className:"flex flex-col items-center gap-12",children:q.jsxs("div",{ref:t,className:"relative w-32 h-32",children:[q.jsx("svg",{ref:e,height:"100%",width:"100%",version:"1.1",xmlns:"http://www.w3.org/2000/svg",viewBox:"0 0 511.999 511.999",className:"filter drop-shadow-lg",style:{filter:"drop-shadow(0 0 30px rgba(55, 65, 81, 0.3))"},children:q.jsx("g",{children:q.jsx("g",{children:q.jsx("path",{d:`M486.203,30.815c-29.313,10.366-118.518,41.91-230.204,41.91S55.11,41.181,25.796,30.815L0,21.694l20.842,121.92
             l8.888,3.144c24.586,8.694,63.632,15.025,113.844,18.682v42.577c-50.544-4.079-79.679-10.691-96.364-16.592l-10.709,30.282
