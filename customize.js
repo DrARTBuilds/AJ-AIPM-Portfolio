@@ -2281,37 +2281,51 @@ if (modifiedJs.includes(originalCanvasPinHidden)) {
   console.log('   ⚠️ Could not find canvas wrapper hidden class in JS.');
 }
 
-// 5.2 Interactive & Auto-Open Loader Transition Logic
+// 5.2 Interactive & Auto-Open Loader Transition Logic (3.5s Min Display, 6s Auto-Open)
 const originalLoaderTimeout = 'xe.useEffect(()=>{const i=setTimeout(()=>{const s=t.current?.closest(".loader-container");s&&No.to(s,{opacity:0,duration:.8,ease:"power2.inOut",pointerEvents:"none"}),r&&r()},5e3);return()=>clearTimeout(i)},[r])';
 
 const targetLoaderTimeout = `xe.useEffect(()=>{
   let completed = false;
+  let minTimeElapsed = false;
+  let assetsReady = false;
   let autoTimer = null;
-  const events = ["click", "pointerdown", "touchstart", "mousemove", "scroll", "wheel", "keydown"];
+  const events = ["click", "pointerdown", "touchstart", "scroll", "wheel", "keydown"];
 
   const executeTransition = () => {
     if (completed) return;
+    if (!minTimeElapsed) return;
     completed = true;
     if (autoTimer) clearTimeout(autoTimer);
     window.removeEventListener("voyage-assets-loaded", onAssetsLoaded);
     events.forEach(evt => window.removeEventListener(evt, executeTransition));
 
     const s = t.current?.closest(".loader-container");
-    s ? No.to(s, { opacity: 0, duration: 1.0, ease: "power2.inOut", pointerEvents: "none", onComplete: r }) : (r && r());
+    s ? No.to(s, { opacity: 0, duration: 1.2, ease: "power2.inOut", pointerEvents: "none", onComplete: r }) : (r && r());
   };
 
-  const onAssetsLoaded = () => {
-    const badgeText = document.getElementById("voyage-badge-text");
-    if (badgeText) {
-      badgeText.innerText = "✦ 3D Voyage Ready — Click or Move Mouse to Explore";
+  const trySetupInteraction = () => {
+    if (assetsReady) {
+      const badgeText = document.getElementById("voyage-badge-text");
+      if (badgeText) {
+        badgeText.innerText = "✦ 3D Voyage Ready — Click Anywhere or Scroll to Explore";
+      }
+      events.forEach(evt => window.addEventListener(evt, executeTransition, { passive: true }));
+      if (minTimeElapsed && !autoTimer && !completed) {
+        autoTimer = setTimeout(() => {
+          executeTransition();
+        }, 6000);
+      }
     }
-    // Listen for any click or cursor movement to dissolve immediately
-    events.forEach(evt => window.addEventListener(evt, executeTransition, { passive: true, once: true }));
-    
-    // Auto-open into 3D scene after 3 seconds if no user interaction occurs
-    autoTimer = setTimeout(() => {
-      executeTransition();
-    }, 3000);
+  };
+
+  const minTimer = setTimeout(() => {
+    minTimeElapsed = true;
+    trySetupInteraction();
+  }, 3500);
+
+  const onAssetsLoaded = () => {
+    assetsReady = true;
+    trySetupInteraction();
   };
 
   window.addEventListener("voyage-assets-loaded", onAssetsLoaded);
@@ -2321,10 +2335,13 @@ const targetLoaderTimeout = `xe.useEffect(()=>{
 
   const fallbackTimer = setTimeout(() => {
     window.voyageAssetsLoaded = true;
-    onAssetsLoaded();
-  }, 10000);
+    assetsReady = true;
+    minTimeElapsed = true;
+    executeTransition();
+  }, 12000);
 
   return () => {
+    clearTimeout(minTimer);
     if (autoTimer) clearTimeout(autoTimer);
     clearTimeout(fallbackTimer);
     window.removeEventListener("voyage-assets-loaded", onAssetsLoaded);
