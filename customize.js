@@ -700,6 +700,18 @@ if (modifiedJs.includes(originalAudioProvider)) {
   console.log('❌ Failed to locate React Audio Provider (Vte) in Javascript file!');
 }
 
+// 3.992. PATCH POLYHAVEN EXTERNAL HDRI URLS TO LOCAL SERVED ASSETS (OFFLINE RELIABILITY)
+const polyDayRemote = 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/kloofendal_48d_partly_cloudy_puresky_1k.hdr';
+const polyNightRemote = 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/qwantani_moonrise_puresky_2k.hdr';
+const polyDayLocal = '/models/kloofendal_1k.hdr';
+const polyNightLocal = '/models/qwantani_2k.hdr';
+
+if (modifiedJs.includes(polyDayRemote)) {
+  modifiedJs = modifiedJs.replaceAll(polyDayRemote, polyDayLocal);
+  modifiedJs = modifiedJs.replaceAll(polyNightRemote, polyNightLocal);
+  console.log('✅ Patched external Polyhaven HDRI URLs to local /models/ assets.');
+}
+
 
 
 // 4. INJECT WEATHER SYSTEM INTO R3F CANVAS
